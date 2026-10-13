@@ -1,0 +1,84 @@
+plugins {
+    id 'java'
+    id 'io.papermc.paperweight.userdev' version '2.0.0-beta.21'
+    id 'com.gradleup.shadow' version '9.3.2'
+}
+
+group = 'ru.net.terracraft'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+    maven { url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+    maven { url = 'https://jitpack.io' }
+    maven { url = 'https://repo.codemc.org/repository/maven-public/' }
+}
+
+dependencies {
+    // Paper dev bundle (API + NMS)
+    paperweight.paperDevBundle('1.21.11-R0.1-SNAPSHOT')
+
+    // Vault (только компиляция)
+    compileOnly 'com.github.Foulest:Vault:2.5.0'
+
+    // ConfigLib (внутрь JAR)
+    implementation 'de.exlll:configlib-yaml:4.8.1'
+
+    // CommandAPI (только компиляция, на сервере плагином)
+    compileOnly 'dev.jorel:commandapi-paper-core:12.1.0'
+
+    // PlaceholderAPI (только компиляция)
+    compileOnly 'me.clip:placeholderapi:2.12.3'
+
+    // Update Notifier (внутрь JAR)
+    implementation 'com.github.ez-plugins:mc-plugin-update-notifier:1.0.0'
+
+    // БД (внутрь JAR)
+    implementation 'com.h2database:h2:2.3.232'
+    implementation 'com.zaxxer:HikariCP:6.2.1'
+    implementation 'org.bstats:bstats-bukkit:3.2.1'
+}
+
+def targetJavaVersion = 21
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = targetJavaVersion
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('paper-plugin.yml') {
+        expand props
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('')
+
+    relocate 'org.bstats',           'ru.net.terracraft.core.libs.bstats'
+    relocate 'com.zaxxer.hikari',    'ru.net.terracraft.core.libs.hikari'
+    relocate 'org.h2',               'ru.net.terracraft.core.libs.h2'
+    relocate 'de.exlll.configlib',   'ru.net.terracraft.core.libs.configlib'
+    relocate 'com.github.ezplugins', 'ru.net.terracraft.core.libs.updater'
+
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/LICENSE*'
+    exclude 'META-INF/NOTICE*'
+    exclude 'module-info.class'
+
+    mergeServiceFiles()
+}
+
+tasks.named('jar') {
+    enabled = false
+}
+
+build.dependsOn shadowJar

@@ -1,0 +1,119 @@
+# ============ General ============
+prefix=<gray>[<sprite:items:item/emerald> <gradient:#00d4ff:#7b2ff7>TerraCore</gradient><gray>] <reset>
+no.permission=<red><sprite:gui:container/beacon/cancel> <white>No permission.
+player.only=<red><sprite:gui:container/beacon/cancel> <white>This command is for players only.
+player.not.found=<red><sprite:items:item/barrier> <white>Player <player> not found.
+player.offline=<red><sprite:items:item/barrier> <white>Player <player> is offline.
+invalid.argument=<red><sprite:items:item/barrier> <white>Invalid argument: <value>
+usage=<gray><sprite:items:item/book> <white>Usage: <value>
+reloaded=<green><sprite:gui:container/beacon/confirm> <white>Config reloaded.
+reload.failed=<red><sprite:gui:container/beacon/cancel> <white>Reload failed: <value>
+
+# ============ God ============
+god.enabled.self=<green><sprite:items:item/netherite_chestplate> <white>Godmode <green>enabled</green>.
+god.enabled.other=<green><sprite:items:item/netherite_chestplate> <white>Godmode granted to <player>.
+god.disabled.self=<red><sprite:items:item/netherite_chestplate> <white>Godmode <red>disabled</red>.
+god.disabled.other=<red><sprite:items:item/netherite_chestplate> <white>Godmode removed from <player>.
+god.received.enabled=<green><sprite:items:item/netherite_chestplate> <white>You have been granted <green>Godmode</green>.
+god.received.disabled=<red><sprite:items:item/netherite_chestplate> <white>Your <red>Godmode</red> has been removed.
+
+# ============ Fly ============
+fly.enabled.self=<green><sprite:items:item/elytra> <white>Flight enabled.
+fly.enabled.other=<green><sprite:items:item/elytra> <white>Flight granted to <player>.
+fly.disabled.self=<red><sprite:items:item/elytra> <white>Flight disabled.
+fly.disabled.other=<red><sprite:items:item/elytra> <white>Flight removed from <player>.
+fly.not.allowed.world=<red><sprite:items:item/barrier> <white>Flight is not allowed in this world.
+
+# ============ Heal ============
+heal.self=<green><sprite:items:item/golden_apple> <white>You have been healed.
+heal.other=<green><sprite:items:item/golden_apple> <white>Player <player> has been healed.
+heal.received=<green><sprite:items:item/golden_apple> <white>You have been healed.
+heal.failed=<red><sprite:items:item/barrier> <white>Healing failed.
+heal.amount=<green><sprite:items:item/glistering_melon_slice> <white>Restored <value> hearts.
+
+# ============ Feed ============
+feed.self=<green><sprite:items:item/cooked_beef> <white>You have been fed.
+feed.other=<green><sprite:items:item/cooked_beef> <white>Player <player> has been fed.
+feed.received=<green><sprite:items:item/cooked_beef> <white>You have been fed.
+feed.failed=<red><sprite:items:item/barrier> <white>Feeding failed.
+feed.amount=<green><sprite:items:item/bread> <white>Restored <value> food.
+
+# ============ Speed ============
+speed.set.walk=<green><sprite:items:item/leather_boots> <white>Walk speed: <value>
+speed.set.fly=<green><sprite:items:item/feather> <white>Fly speed: <value>
+speed.reset=<green><sprite:items:item/sugar> <white>Speed reset.
+speed.invalid.value=<red><sprite:items:item/barrier> <white>Invalid value: <value>
+
+# ============ Repair ============
+repair.success=<green><sprite:items:item/anvil> <white>Items repaired: <value>
+repair.no.item=<red><sprite:items:item/barrier> <white>Nothing to repair.
+repair.failed=<red><sprite:items:item/barrier> <white>Repair failed.
+repair.broken=<red><sprite:items:item/anvil> <white>Item <item> broke!
+repair.summary.header=<green><sprite:items:item/anvil> <white>Repair complete:
+repair.summary.repaired=<dark_gray>  • <green>Repaired: <white><value>
+repair.summary.broken=<dark_gray>  • <red>Broken: <white><value>
+repair.summary.failed=<dark_gray>  • <yellow>Failed: <white><value>
+
+# ============ Enchant / Give ============
+enchant.success=<green><sprite:items:item/enchanted_book> <white>Applied <value> level <amount>.
+enchant.invalid=<red><sprite:items:item/barrier> <white>Unknown enchantment: <value>
+give.success=<green><sprite:items:item/chest> <white>Gave <value> x<amount> to <player>.
+give.received=<green><sprite:items:item/chest> <white>You received <value> x<amount>.
+
+# ============ SpawnMob ============
+spawnmob.success=<green><sprite:items:item/spawner> <white>Spawned <value> x<amount>.
+spawnmob.invalid.type=<red><sprite:items:item/barrier> <white>Unknown mob type: <value>
+spawnmob.limit.reached=<red><sprite:items:item/barrier> <white>Too many! Maximum: <value>
+
+# ============ Vanish ============
+vanish.enabled=<green><sprite:items:item/ender_pearl> <white>You are now hidden from other players.
+vanish.disabled=<red><sprite:items:item/ender_eye> <white>You are visible again.
+vanish.other.enabled=<green><sprite:items:item/ender_pearl> <white>Player <player> is now hidden.
+vanish.other.disabled=<green><sprite:items:item/ender_eye> <white>Player <player> is visible again.
+vanish.disabled.world=<red><sprite:items:item/barrier> <white>Vanish is not allowed in this world.
+vanish.list.header=<gray><sprite:items:item/ender_pearl> <white>Hidden players: <value>
+vanish.list.entry=<gray> <sprite:items:item/player_head> <white><player>
+vanish.list.empty=<gray><sprite:items:item/barrier> <white>No hidden players.
+
+# ============ Gamemode ============
+gamemode.set.self=<green><sprite:items:item/crafting_table> <white>Gamemode: <value>
+gamemode.set.other=<green><sprite:items:item/crafting_table> <white>Gamemode of <player>: <value>
+gamemode.received=<green><sprite:items:item/crafting_table> <white>Your gamemode was set to <value>
+gamemode.invalid=<red><sprite:items:item/barrier> <white>Unknown gamemode: <value>
+gamemode.restored=<green><sprite:items:item/crafting_table> <white>Restored gamemode <value> for <player>
+gamemode.name.survival=Survival
+gamemode.name.creative=Creative
+gamemode.name.adventure=Adventure
+gamemode.name.spectator=Spectator
+
+# ============ Workbench / Enderchest / Hat ============
+workbench.opened=<green><sprite:items:item/crafting_table> <white>Workbench opened.
+workbench.disabled.world=<red><sprite:items:item/barrier> <white>Workbench is not allowed in this world.
+enderchest.opened.self=<green><sprite:items:item/ender_chest> <white>Ender chest opened.
+enderchest.opened.other=<green><sprite:items:item/ender_chest> <white>Opened ender chest of <player>.
+enderchest.opened.for.target=<green><sprite:items:item/ender_chest> <white>Your ender chest was opened for <player>.
+enderchest.disabled.world=<red><sprite:items:item/barrier> <white>Ender chest is not allowed in this world.
+hat.success=<green><sprite:items:item/leather_helmet> <white>Item placed on your head.
+hat.no.item=<red><sprite:items:item/barrier> <white>Hold an item in your hand.
+hat.returned=<gray><sprite:items:item/leather_helmet> <white>Previous helmet returned to your inventory.
+
+# ============ Confirmations ============
+confirm.button.yes=<green><bold>[✔ Yes]</bold></green>
+confirm.button.no=<red><bold>[✘ No]</bold></red>
+confirm.button.yes.hover=<green>Confirm action
+confirm.button.no.hover=<red>Cancel action
+confirm.hint=<dark_gray>You have 30 seconds to confirm.
+confirm.expired=<red>Confirmation expired.
+confirm.cancelled=<gray>Action cancelled.
+confirm.repair.header=<yellow><sprite:items:item/anvil> <white>Repair <gold><count></gold> items?
+confirm.heal.header=<yellow><sprite:items:item/golden_apple> <white>Heal with <gold><chance>%</gold> chance?
+confirm.feed.header=<yellow><sprite:items:item/cooked_beef> <white>Feed with <gold><chance>%</gold> chance?
+
+# ============ Chances ============
+chance.repair.warn=<yellow><sprite:items:item/anvil> <white>Warning: repair chance <gold><chance>%</gold>, break chance <red><break>%</red>.
+chance.heal.warn=<yellow><sprite:items:item/golden_apple> <white>Warning: heal chance <gold><chance>%</gold>.
+chance.feed.warn=<yellow><sprite:items:item/cooked_beef> <white>Warning: feed chance <gold><chance>%</gold>.
+
+# ============ Cooldown ============
+cooldown.active=<red><sprite:items:item/clock> <white>Please wait <value> sec.
+cooldown.expired=<green><sprite:items:item/clock> <white>Cooldown expired.

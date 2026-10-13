@@ -1,0 +1,119 @@
+# ============ Общие ============
+prefix=<gray>[<sprite:items:item/emerald> <gradient:#00d4ff:#7b2ff7>TerraCore</gradient><gray>] <reset>
+no.permission=<red><sprite:gui:container/beacon/cancel> <white>Нет доступа.
+player.only=<red><sprite:gui:container/beacon/cancel> <white>Команда только для игроков.
+player.not.found=<red><sprite:items:item/barrier> <white>Игрок <player> не найден.
+player.offline=<red><sprite:items:item/barrier> <white>Игрок <player> не в сети.
+invalid.argument=<red><sprite:items:item/barrier> <white>Неверный аргумент: <value>
+usage=<gray><sprite:items:item/book> <white>Использование: <value>
+reloaded=<green><sprite:gui:container/beacon/confirm> <white>Конфиг перезагружен.
+reload.failed=<red><sprite:gui:container/beacon/cancel> <white>Ошибка перезагрузки: <value>
+
+# ============ God ============
+god.enabled.self=<green><sprite:items:item/netherite_chestplate> <white>Godmode <green>включён</green>.
+god.enabled.other=<green><sprite:items:item/netherite_chestplate> <white>Godmode выдан игроку <player>.
+god.disabled.self=<red><sprite:items:item/netherite_chestplate> <white>Godmode <red>выключен</red>.
+god.disabled.other=<red><sprite:items:item/netherite_chestplate> <white>Godmode снят с <player>.
+god.received.enabled=<green><sprite:items:item/netherite_chestplate> <white>Вам выдан <green>Godmode</green>.
+god.received.disabled=<red><sprite:items:item/netherite_chestplate> <white>С вас снят <red>Godmode</red>.
+
+# ============ Fly ============
+fly.enabled.self=<green><sprite:items:item/elytra> <white>Полёт включён.
+fly.enabled.other=<green><sprite:items:item/elytra> <white>Полёт выдан <player>.
+fly.disabled.self=<red><sprite:items:item/elytra> <white>Полёт выключен.
+fly.disabled.other=<red><sprite:items:item/elytra> <white>Полёт снят с <player>.
+fly.not.allowed.world=<red><sprite:items:item/barrier> <white>Полёт запрещён в этом мире.
+
+# ============ Heal ============
+heal.self=<green><sprite:items:item/golden_apple> <white>Вы исцелены.
+heal.other=<green><sprite:items:item/golden_apple> <white>Игрок <player> исцелён.
+heal.received=<green><sprite:items:item/golden_apple> <white>Вас исцелили.
+heal.failed=<red><sprite:items:item/barrier> <white>Исцеление не удалось.
+heal.amount=<green><sprite:items:item/glistering_melon_slice> <white>Восстановлено <value> сердец.
+
+# ============ Feed ============
+feed.self=<green><sprite:items:item/cooked_beef> <white>Вы насытились.
+feed.other=<green><sprite:items:item/cooked_beef> <white>Игрок <player> накормлен.
+feed.received=<green><sprite:items:item/cooked_beef> <white>Вас накормили.
+feed.failed=<red><sprite:items:item/barrier> <white>Насыщение не удалось.
+feed.amount=<green><sprite:items:item/bread> <white>Восстановлено <value> еды.
+
+# ============ Speed ============
+speed.set.walk=<green><sprite:items:item/leather_boots> <white>Скорость ходьбы: <value>
+speed.set.fly=<green><sprite:items:item/feather> <white>Скорость полёта: <value>
+speed.reset=<green><sprite:items:item/sugar> <white>Скорость сброшена.
+speed.invalid.value=<red><sprite:items:item/barrier> <white>Недопустимое значение: <value>
+
+# ============ Repair ============
+repair.success=<green><sprite:items:item/anvil> <white>Починено предметов: <value>
+repair.no.item=<red><sprite:items:item/barrier> <white>Нечего чинить.
+repair.failed=<red><sprite:items:item/barrier> <white>Починка не удалась.
+repair.broken=<red><sprite:items:item/anvil> <white>Предмет <item> сломался!
+repair.summary.header=<green><sprite:items:item/anvil> <white>Починка завершена:
+repair.summary.repaired=<dark_gray>  • <green>Починено: <white><value>
+repair.summary.broken=<dark_gray>  • <red>Сломано: <white><value>
+repair.summary.failed=<dark_gray>  • <yellow>Неудачно: <white><value>
+
+# ============ Enchant / Give ============
+enchant.success=<green><sprite:items:item/enchanted_book> <white>Наложен <value> уровня <amount>.
+enchant.invalid=<red><sprite:items:item/barrier> <white>Неизвестный энчант: <value>
+give.success=<green><sprite:items:item/chest> <white>Выдано <value> x<amount> игроку <player>.
+give.received=<green><sprite:items:item/chest> <white>Вы получили <value> x<amount>.
+
+# ============ SpawnMob ============
+spawnmob.success=<green><sprite:items:item/spawner> <white>Заспавнено <value> x<amount>.
+spawnmob.invalid.type=<red><sprite:items:item/barrier> <white>Неизвестный тип моба: <value>
+spawnmob.limit.reached=<red><sprite:items:item/barrier> <white>Слишком много! Максимум: <value>
+
+# ============ Vanish ============
+vanish.enabled=<green><sprite:items:item/ender_pearl> <white>Вы скрыты от других игроков.
+vanish.disabled=<red><sprite:items:item/ender_eye> <white>Вы снова видимы.
+vanish.other.enabled=<green><sprite:items:item/ender_pearl> <white>Игрок <player> скрыт.
+vanish.other.disabled=<green><sprite:items:item/ender_eye> <white>Игрок <player> снова видим.
+vanish.disabled.world=<red><sprite:items:item/barrier> <white>Vanish запрещён в этом мире.
+vanish.list.header=<gray><sprite:items:item/ender_pearl> <white>Скрытых игроков: <value>
+vanish.list.entry=<gray> <sprite:items:item/player_head> <white><player>
+vanish.list.empty=<gray><sprite:items:item/barrier> <white>Скрытых игроков нет.
+
+# ============ Gamemode ============
+gamemode.set.self=<green><sprite:items:item/crafting_table> <white>Режим: <value>
+gamemode.set.other=<green><sprite:items:item/crafting_table> <white>Режим игрока <player>: <value>
+gamemode.received=<green><sprite:items:item/crafting_table> <white>Вам установлен режим: <value>
+gamemode.invalid=<red><sprite:items:item/barrier> <white>Неизвестный режим: <value>
+gamemode.restored=<green><sprite:items:item/crafting_table> <white>Возвращён режим <value> для <player>
+gamemode.name.survival=Выживание
+gamemode.name.creative=Креатив
+gamemode.name.adventure=Приключение
+gamemode.name.spectator=Наблюдатель
+
+# ============ Workbench / Enderchest / Hat ============
+workbench.opened=<green><sprite:items:item/crafting_table> <white>Верстак открыт.
+workbench.disabled.world=<red><sprite:items:item/barrier> <white>Верстак запрещён в этом мире.
+enderchest.opened.self=<green><sprite:items:item/ender_chest> <white>Эндер-сундук открыт.
+enderchest.opened.other=<green><sprite:items:item/ender_chest> <white>Открыт эндер-сундук игрока <player>.
+enderchest.opened.for.target=<green><sprite:items:item/ender_chest> <white>Ваш эндер-сундук открыт для <player>.
+enderchest.disabled.world=<red><sprite:items:item/barrier> <white>Эндер-сундук запрещён в этом мире.
+hat.success=<green><sprite:items:item/leather_helmet> <white>Предмет надет на голову.
+hat.no.item=<red><sprite:items:item/barrier> <white>Возьмите предмет в руку.
+hat.returned=<gray><sprite:items:item/leather_helmet> <white>Предыдущий шлем возвращён в инвентарь.
+
+# ============ Подтверждения ============
+confirm.button.yes=<green><bold>[✔ Да]</bold></green>
+confirm.button.no=<red><bold>[✘ Нет]</bold></red>
+confirm.button.yes.hover=<green>Подтвердить действие
+confirm.button.no.hover=<red>Отменить действие
+confirm.hint=<dark_gray>У вас 30 секунд, чтобы подтвердить.
+confirm.expired=<red>Время подтверждения истекло.
+confirm.cancelled=<gray>Действие отменено.
+confirm.repair.header=<yellow><sprite:items:item/anvil> <white>Починить <gold><count></gold> предметов?
+confirm.heal.header=<yellow><sprite:items:item/golden_apple> <white>Исцелиться с шансом <gold><chance>%</gold>?
+confirm.feed.header=<yellow><sprite:items:item/cooked_beef> <white>Насытиться с шансом <gold><chance>%</gold>?
+
+# ============ Шансы ============
+chance.repair.warn=<yellow><sprite:items:item/anvil> <white>Внимание: шанс починки <gold><chance>%</gold>, шанс поломки <red><break>%</red>.
+chance.heal.warn=<yellow><sprite:items:item/golden_apple> <white>Внимание: шанс исцеления <gold><chance>%</gold>.
+chance.feed.warn=<yellow><sprite:items:item/cooked_beef> <white>Внимание: шанс насыщения <gold><chance>%</gold>.
+
+# ============ Кулдаун ============
+cooldown.active=<red><sprite:items:item/clock> <white>Подождите <value> сек.
+cooldown.expired=<green><sprite:items:item/clock> <white>Кулдаун прошёл.

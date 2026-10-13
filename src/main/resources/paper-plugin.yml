@@ -1,0 +1,16 @@
+name: TerraCore
+version: '${version}'
+main: ru.terracraft.core.TerraCorePlugin
+api-version: '1.21'
+authors: [ luci ]
+description: Admin utilities for TerraCraft
+
+dependencies:
+  server:
+    CommandAPI:
+      load: BEFORE
+      required: true
+
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
