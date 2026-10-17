@@ -117,3 +117,23 @@ chance.feed.warn=<yellow><sprite:items:item/cooked_beef> <white>Warning: feed ch
 # ============ Cooldown ============
 cooldown.active=<red><sprite:items:item/clock> <white>Please wait <value> sec.
 cooldown.expired=<green><sprite:items:item/clock> <white>Cooldown expired.
+# ============ Directions ============
+direction.north=North
+direction.south=South
+direction.east=East
+direction.west=West
+
+# ============ Seen ============
+seen.just.now=just now
+time.format.days=<value>d <rest>h
+time.format.hours=<value>h <rest>m
+time.format.minutes=<value>m <rest>s
+time.format.seconds=<value>s
+
+# ============ Whois ============
+whois.unknown=<gray>unknown
+whois.true=<green>✔
+whois.false=<red>✘
+
+# ============ Misc ============
+repair.broken.count=<value> pcs.

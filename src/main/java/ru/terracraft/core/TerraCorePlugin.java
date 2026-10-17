@@ -17,7 +17,7 @@ import ru.terracraft.core.task.VanishTask;
 
 public final class TerraCorePlugin extends JavaPlugin {
 
-    private static final int BSTATS_ID = 00000;   // ← вставь свой ID с bstats.org
+    private static final int BSTATS_ID = 00000;
 
     private ConfigManager configManager;
     private LangManager langManager;

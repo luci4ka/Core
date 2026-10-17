@@ -5,15 +5,7 @@ import ru.terracraft.core.TerraCorePlugin;
 import ru.terracraft.core.command.impl.*;
 
 /**
- * Регистрирует все команды через CommandAPI.
- *
- * CommandAPI сам заботится о:
- *   - правах (.withPermission)
- *   - таб-комплите
- *   - парсинге аргументов
- *   - sender-валидации (.executesPlayer)
- *
- * paper-plugin.yml НЕ содержит секцию commands — всё здесь.
+ * Регистрация всех команд TerraCore через CommandAPI.
  */
 public class CommandRegistrar {
 
@@ -42,11 +34,43 @@ public class CommandRegistrar {
         new EnchantCommand(plugin).register();
         new GiveCommand(plugin).register();
         new HatCommand(plugin).register();
+        new MoreCommand(plugin).register();
+        new SkullCommand(plugin).register();
+        new TreeCommand(plugin).register();
+        new ItemNameCommand(plugin).register();
+        new ItemLoreCommand(plugin).register();
 
         // ==== Мир / мобы ====
         new GamemodeCommand(plugin).register();
         new SpawnMobCommand(plugin).register();
         new WorkbenchCommand(plugin).register();
         new EnderchestCommand(plugin).register();
+
+        // ==== Погода / время ====
+        new WeatherCommand(plugin).register();
+        new TimeCommand(plugin).register();
+        new PTimeCommand(plugin).register();
+        new PWeatherCommand(plugin).register();
+
+        // ==== Перемещение ====
+        new TopCommand(plugin).register();
+        new JumpCommand(plugin).register();
+
+        // ==== Действия над игроком ====
+        new ExtCommand(plugin).register();
+        new SuicideCommand(plugin).register();
+        new BurnCommand(plugin).register();
+        new IceCommand(plugin).register();
+
+        // ==== Информация ====
+        new GcCommand(plugin).register();
+        new GetPosCommand(plugin).register();
+        new DepthCommand(plugin).register();
+        new CompassCommand(plugin).register();
+        new WhoisCommand(plugin).register();
+        new NearCommand(plugin).register();
+        new SeenCommand(plugin).register();
+        new ListCommand(plugin).register();
+        new PingCommand(plugin).register();
     }
 }
