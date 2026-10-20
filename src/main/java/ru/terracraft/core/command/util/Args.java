@@ -1,5 +1,6 @@
 package ru.terracraft.core.command.util;
 
+import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Bukkit;
@@ -14,26 +15,10 @@ import java.util.Locale;
 /**
  * Утилита для построения {@link StringArgument} с Tab-комплитом.
  *
- * <p>Заменяет повторяющиеся блоки:
- * <pre>{@code
- * new StringArgument("target")
- *         .replaceSuggestions((info, builder) -> {
- *             String prefix = info.currentInput().toLowerCase(Locale.ROOT);
- *             for (Player p : Bukkit.getOnlinePlayers()) {
- *                 if (p.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
- *                     builder.suggest(p.getName());
- *                 }
- *             }
- *             return CompletableFuture.completedFuture(builder.build());
- *         })
- * }</pre>
- *
- * <p>на лаконичное:
- * <pre>{@code
- * Args.playerArg("target")
- * Args.worldArg("world")
- * Args.listArg("mode", "walk", "fly")
- * }</pre>
+ * <p>Возвращает {@link Argument}{@code <String>}, а не {@link StringArgument} —
+ * потому что {@link StringArgument#replaceSuggestions(ArgumentSuggestions)}
+ * возвращает {@link Argument}{@code <String>}. Для {@code CommandAPICommand.withArguments(...)}
+ * этого достаточно — принимается любой {@code Argument<?>}.
  */
 public final class Args {
 
@@ -42,10 +27,9 @@ public final class Args {
     // ============ Игроки ============
 
     /**
-     * {@link StringArgument} с саггестами по именам онлайн-игроков.
-     * Префикс сравнивается регистронезависимо.
+     * {@link Argument}{@code <String>} с саггестами по именам онлайн-игроков.
      */
-    public static @NotNull StringArgument playerArg(@NotNull String name) {
+    public static @NotNull Argument<String> playerArg(@NotNull String name) {
         return new StringArgument(name)
                 .replaceSuggestions(ArgumentSuggestions.strings(info -> {
                     String prefix = info.currentInput().toLowerCase(Locale.ROOT);
@@ -62,9 +46,9 @@ public final class Args {
     // ============ Миры ============
 
     /**
-     * {@link StringArgument} с саггестами по именам миров + {@code "all"}.
+     * {@link Argument}{@code <String>} с саггестами по именам миров + {@code "all"}.
      */
-    public static @NotNull StringArgument worldArg(@NotNull String name) {
+    public static @NotNull Argument<String> worldArg(@NotNull String name) {
         return new StringArgument(name)
                 .replaceSuggestions(ArgumentSuggestions.strings(info -> {
                     List<String> list = new ArrayList<>();
@@ -83,11 +67,10 @@ public final class Args {
     // ============ Статический список ============
 
     /**
-     * {@link StringArgument} с фиксированным списком саггестов.
-     * Фильтрация по префиксу — регистронезависимая.
+     * {@link Argument}{@code <String>} с фиксированным списком саггестов.
      */
-    public static @NotNull StringArgument listArg(@NotNull String name,
-                                                  @NotNull String... options) {
+    public static @NotNull Argument<String> listArg(@NotNull String name,
+                                                    @NotNull String... options) {
         return new StringArgument(name)
                 .replaceSuggestions(ArgumentSuggestions.strings(info -> {
                     String prefix = info.currentInput().toLowerCase(Locale.ROOT);
@@ -101,15 +84,15 @@ public final class Args {
                 }));
     }
 
-    // ============ Регистр (для Enchant/SpawnMob — с лимитом) ============
+    // ============ Реестр (Enchant/SpawnMob — с лимитом) ============
 
     /**
-     * {@link StringArgument} с саггестами из {@link Iterable}.
-     * Ограничение — {@code maxSuggestions} (по умолчанию 50).
+     * {@link Argument}{@code <String>} с саггестами из {@link Iterable}.
+     * Ограничение — {@code maxSuggestions}.
      */
-    public static @NotNull StringArgument registryArg(@NotNull String name,
-                                                      @NotNull Iterable<String> all,
-                                                      int maxSuggestions) {
+    public static @NotNull Argument<String> registryArg(@NotNull String name,
+                                                        @NotNull Iterable<String> all,
+                                                        int maxSuggestions) {
         return new StringArgument(name)
                 .replaceSuggestions(ArgumentSuggestions.strings(info -> {
                     String prefix = info.currentInput().toLowerCase(Locale.ROOT);
@@ -126,8 +109,8 @@ public final class Args {
     }
 
     /** Удобный overload с дефолтным лимитом 50. */
-    public static @NotNull StringArgument registryArg(@NotNull String name,
-                                                      @NotNull Iterable<String> all) {
+    public static @NotNull Argument<String> registryArg(@NotNull String name,
+                                                        @NotNull Iterable<String> all) {
         return registryArg(name, all, 50);
     }
 }

@@ -34,9 +34,6 @@ public class MailService {
 
     // ============ Отправка ============
 
-    /**
-     * @return {@code true} — отправлено; {@code false} — БД недоступна.
-     */
     public boolean send(@NotNull UUID recipient,
                         @NotNull UUID sender,
                         @NotNull String senderName,
@@ -77,7 +74,7 @@ public class MailService {
                 .inTable(table())
                 .addCondition("recipient", recipient.toString())
                 .orderBy("sent_at", false)
-                .setLimit(0, limit)
+                .setLimit(limit)
                 .build()
                 .execute()) {
             ResultSet rs = query.getResultSet();
@@ -142,7 +139,6 @@ public class MailService {
         }
     }
 
-    /** Удалить ВСЕ прочитанные письма получателя. @return сколько удалено (или -1). */
     public int clearRead(@NotNull UUID recipient) {
         SQLManager sql = plugin.storage().sqlOrNull();
         if (sql == null) return -1;
