@@ -36,34 +36,79 @@ public record AdminToolsConfig(
         Worlds worlds,
 
         @Comment("Настройки vanish")
-        Vanish vanish
+        Vanish vanish,
+
+        @Comment("Настройки /compass (BossBar)")
+        Compass compass,
+
+        @Comment("Настройки /spawnmob")
+        SpawnMob spawnMob,
+
+        @Comment("Настройки /time")
+        Time time,
+
+        @Comment("Настройки /weather")
+        Weather weather,
+
+        @Comment("Настройки /speed")
+        Speed speed,
+
+        @Comment("Настройки /burn")
+        Burn burn,
+
+        @Comment("Настройки /ice")
+        Ice ice,
+
+        @Comment("Настройки /near")
+        Near near,
+
+        @Comment("Настройки /ping")
+        Ping ping,
+
+        @Comment("Настройки /enchant")
+        Enchant enchant,
+
+        @Comment("Настройки /give")
+        Give give,
+
+        @Comment("Хранилище: memory | h2 | mariadb")
+        Storage storage
 ) {
 
     public AdminToolsConfig {
-        if (general      == null) general      = new General(true, true);
+        if (general      == null) general      = new General(true);
         if (feedback     == null) feedback     = new Feedback(true, true, true);
         if (integrations == null) integrations = new Integrations(true, true);
         if (heal         == null) heal         = new Heal(100.0, 2);
         if (feed         == null) feed         = new Feed(100.0, 10);
         if (repair       == null) repair       = new Repair(100.0, 0.0);
-        if (cooldowns    == null) cooldowns    = new Cooldowns(0, 0, 0, 5, 3, 0, 0, 0, 0, 0);
+        if (cooldowns    == null) cooldowns    = new Cooldowns(0, 0, 0, 5, 3, 0, 0, 0, 0, 0, 60);
         if (hat          == null) hat          = new Hat(true, false);
         if (worlds       == null) worlds       = new Worlds(
-                List.of(),
-                List.of("world_nether", "world_the_end"),
-                List.of()
+                List.of(),   // flyDisabledWorlds
+                List.of(),   // workbenchDisabledWorlds
+                List.of()    // vanishDisabledWorlds
         );
-        if (vanish       == null) vanish       = new Vanish(true, false, false);
+        if (vanish       == null) vanish       = new Vanish(true, false, 100);
+        if (compass      == null) compass      = new Compass(30, 2, "BLUE", "PROGRESS");
+        if (spawnMob     == null) spawnMob     = new SpawnMob(50, 1024, 2.0);
+        if (time         == null) time         = new Time(3, 60);
+        if (weather      == null) weather      = new Weather(12_000, 6_000, 3_600);
+        if (speed        == null) speed        = new Speed(0.1, 0.1);
+        if (burn         == null) burn         = new Burn(5, 60);
+        if (ice          == null) ice          = new Ice(5, 60);
+        if (near         == null) near         = new Near(200);
+        if (ping         == null) ping         = new Ping(50, 100);
+        if (enchant      == null) enchant      = new Enchant(255);
+        if (give         == null) give         = new Give(6400);
+        if (storage      == null) storage      = new Storage("tc_");
     }
 
     // ============ GENERAL ============
 
     public record General(
             @Comment("Логировать ли действия админов в консоль")
-            boolean logAdminActions,
-
-            @Comment("Показывать ли подсказки (usage) при неверном вводе")
-            boolean showUsageOnError
+            boolean logAdminActions
     ) {}
 
     // ============ FEEDBACK ============
@@ -141,9 +186,10 @@ public record AdminToolsConfig(
             @Comment("Кулдаун /vanish (0 = без)")
             int vanish,
             @Comment("Кулдаун /spawnmob (0 = без)")
-            int spawnmob
+            int spawnmob,
+            @Comment("Период очистки просроченных кулдаунов (в минутах, 0 = отключено)")
+            int cleanupPeriodMinutes
     ) {
-        /** Возвращает кулдаун для команды. */
         public int forCommand(CommandKey key) {
             return switch (key) {
                 case GOD        -> god;
@@ -192,7 +238,127 @@ public record AdminToolsConfig(
             @Comment("Могут ли vanished-игроки наносить урон")
             boolean canHitPlayers,
 
-            @Comment("Объявлять в чат, когда игрок уходит в vanish")
-            boolean announceOnVanish
+            @Comment("Период переприменения видимости (тики, 20 = 1 сек, 0 = отключено)")
+            int reapplyPeriodTicks
+    ) {}
+
+    // ============ COMPASS ============
+
+    public record Compass(
+            @Comment("Длительность показа BossBar в секундах (0 = бесконечно)")
+            int durationSeconds,
+
+            @Comment("Период обновления BossBar в тиках (2 = 10 раз/сек)")
+            int updatePeriodTicks,
+
+            @Comment("Цвет BossBar: BLUE, RED, GREEN, YELLOW, PURPLE, WHITE, PINK")
+            String color,
+
+            @Comment("Стиль BossBar: PROGRESS, NOTCHED_6, NOTCHED_10, NOTCHED_12, NOTCHED_20")
+            String overlay
+    ) {}
+
+    // ============ SPAWNMOB ============
+
+    public record SpawnMob(
+            @Comment("Максимальное количество мобов за один вызов /spawnmob")
+            int maxCount,
+
+            @Comment("Максимальное здоровье моба (в HP, 20 = 10 сердец)")
+            int maxHealth,
+
+            @Comment("Радиус разброса спавна (в блоках, 2 = ±1 блок)")
+            double spreadRadius
+    ) {}
+
+    // ============ TIME ============
+
+    public record Time(
+            @Comment("Длительность плавной смены времени по умолчанию (сек)")
+            int defaultSmoothSeconds,
+
+            @Comment("Максимальная длительность /time smooth (сек)")
+            int maxSmoothSeconds
+    ) {}
+
+    // ============ WEATHER ============
+
+    public record Weather(
+            @Comment("Длительность ясной погоды после /weather unlock (тики, 12000 = 10 мин)")
+            int clearDuration,
+
+            @Comment("Длительность дождя после /weather unlock (тики, 6000 = 5 мин)")
+            int rainDuration,
+
+            @Comment("Длительность грозы после /weather unlock (тики, 3600 = 3 мин)")
+            int thunderDuration
+    ) {}
+
+    // ============ SPEED ============
+
+    public record Speed(
+            @Comment("Скорость ходьбы по умолчанию (0.1 = ваниль)")
+            double walkDefault,
+
+            @Comment("Скорость полёта по умолчанию (0.1 = ваниль)")
+            double flyDefault
+    ) {}
+
+    // ============ BURN ============
+
+    public record Burn(
+            @Comment("Длительность поджога по умолчанию (сек)")
+            int defaultSeconds,
+
+            @Comment("Максимальная длительность поджога (сек)")
+            int maxSeconds
+    ) {}
+
+    // ============ ICE ============
+
+    public record Ice(
+            @Comment("Длительность заморозки по умолчанию (сек)")
+            int defaultSeconds,
+
+            @Comment("Максимальная длительность заморозки (сек)")
+            int maxSeconds
+    ) {}
+
+    // ============ NEAR ============
+
+    public record Near(
+            @Comment("Радиус /near по умолчанию (блоки)")
+            int defaultRadius
+    ) {}
+
+    // ============ PING ============
+
+    public record Ping(
+            @Comment("Порог 'хорошего' пинга (мс) — зелёный")
+            int goodThreshold,
+
+            @Comment("Порог 'плохого' пинга (мс) — красный")
+            int badThreshold
+    ) {}
+
+    // ============ ENCHANT ============
+
+    public record Enchant(
+            @Comment("Максимальный уровень зачарования через /enchant (1..255)")
+            int maxLevel
+    ) {}
+
+    // ============ GIVE ============
+
+    public record Give(
+            @Comment("Максимальное количество предметов за один /give")
+            int maxAmount
+    ) {}
+
+    // ============ STORAGE ============
+
+    public record Storage(
+            @Comment("Префикс таблиц (например, tc_)")
+            String tablePrefix
     ) {}
 }

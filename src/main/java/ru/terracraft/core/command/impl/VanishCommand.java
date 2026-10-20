@@ -1,7 +1,7 @@
 package ru.terracraft.core.command.impl;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.EntitySelectorArgument;
+import dev.jorel.commandapi.arguments.StringArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -15,6 +15,10 @@ import ru.terracraft.core.config.CommandKey;
 import ru.terracraft.core.lang.LangKey;
 import ru.terracraft.core.manager.VanishManager;
 
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+
 public class VanishCommand {
 
     public static final String PERM_SELF   = "terracraft.core.vanish";
@@ -27,7 +31,6 @@ public class VanishCommand {
     }
 
     public void register() {
-        // /vanish
         new CommandAPICommand("vanish")
                 .withAliases("v")
                 .withPermission(PERM_SELF)
@@ -42,10 +45,13 @@ public class VanishCommand {
                     plugin.msg().actionBar(player,
                             nowHidden ? LangKey.VANISH_ENABLED : LangKey.VANISH_DISABLED);
                     plugin.msg().sound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 0.7f, 1.2f);
+                    plugin.msg().logAction(player, "/vanish",
+                            "player", player.getName(),
+                            "state", nowHidden ? "on" : "off");
+                    plugin.stats().increment(player, "vanish");
                 })
                 .register();
 
-        // /vanish list — с кликабельными никами
         new CommandAPICommand("vanish")
                 .withSubcommand(new CommandAPICommand("list")
                         .withPermission(VanishManager.PERM_SEE)
@@ -56,13 +62,24 @@ public class VanishCommand {
                                 return;
                             }
 
-                            plugin.msg().sendRaw(sender, LangKey.VANISH_LIST_HEADER,
-                                    "value", all.size());
-
+                            var online = new ArrayList<Player>();
                             for (var id : all) {
                                 Player p = Bukkit.getPlayer(id);
-                                if (p == null) continue;
+                                if (p != null) online.add(p);
+                            }
 
+                            if (online.isEmpty()) {
+                                plugin.msg().send(sender, LangKey.VANISH_LIST_EMPTY);
+                                plugin.getLogger().warning(
+                                        "VanishManager содержит " + all.size()
+                                                + " офлайн-игроков — почистите их при PlayerQuitEvent");
+                                return;
+                            }
+
+                            plugin.msg().sendRaw(sender, LangKey.VANISH_LIST_HEADER,
+                                    "value", online.size());
+
+                            for (Player p : online) {
                                 Component entry = plugin.msg().mini().deserialize(
                                                 "<dark_gray>  • <white>" + p.getName())
                                         .hoverEvent(HoverEvent.showText(
@@ -75,13 +92,25 @@ public class VanishCommand {
                         }))
                 .register();
 
-        // /vanish <target>
         new CommandAPICommand("vanish")
                 .withPermission(PERM_OTHERS)
-                .withArguments(new EntitySelectorArgument.OnePlayer("target"))
+                .withArguments(new StringArgument("target")
+                        .replaceSuggestions((info, builder) -> {
+                            String prefix = info.currentInput().toLowerCase(Locale.ROOT);
+                            for (Player p : Bukkit.getOnlinePlayers()) {
+                                if (p.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
+                                    builder.suggest(p.getName());
+                                }
+                            }
+                            return CompletableFuture.completedFuture(builder.build());
+                        }))
                 .executes((sender, args) -> {
-                    Player target = (Player) args.get("target");
-                    if (target == null) return;
+                    String name = (String) args.get("target");
+                    Player target = Bukkit.getPlayerExact(name);
+                    if (target == null) {
+                        plugin.msg().send(sender, LangKey.PLAYER_NOT_FOUND, "player", name);
+                        return;
+                    }
                     if (isWorldDisabled(target)) {
                         plugin.msg().send(sender, LangKey.VANISH_DISABLED_WORLD);
                         return;
@@ -97,6 +126,10 @@ public class VanishCommand {
                                 nowHidden ? LangKey.VANISH_ENABLED : LangKey.VANISH_DISABLED);
                         plugin.msg().sound(target, Sound.ENTITY_ENDERMAN_TELEPORT, 0.7f, 1.2f);
                     }
+                    plugin.msg().logAction(sender, "/vanish",
+                            "player", target.getName(),
+                            "state", nowHidden ? "on" : "off");
+                    if (sender instanceof Player p) plugin.stats().increment(p, "vanish");
                 })
                 .register();
     }

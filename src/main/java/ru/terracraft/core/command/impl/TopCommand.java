@@ -36,14 +36,15 @@ public class TopCommand {
                     top.setYaw(loc.getYaw());
                     top.setPitch(loc.getPitch());
 
-                    // Проверим, что не на том же месте
                     if (top.getBlockY() <= loc.getBlockY()) {
                         plugin.msg().send(player, LangKey.TOP_NO_BLOCK);
                         return;
                     }
 
                     player.teleport(top);
-                    plugin.msg().actionBar(player, LangKey.TOP_SUCCESS,
+
+                    // Чат — «телепорт на Y=120» полезно видеть дольше 2 секунд
+                    plugin.msg().send(player, LangKey.TOP_SUCCESS,
                             "y", top.getBlockY());
                     plugin.msg().sound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 0.6f, 1.5f);
                 })

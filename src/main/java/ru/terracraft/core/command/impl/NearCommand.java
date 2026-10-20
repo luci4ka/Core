@@ -5,6 +5,7 @@ import dev.jorel.commandapi.arguments.IntegerArgument;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import ru.terracraft.core.TerraCorePlugin;
+import ru.terracraft.core.config.AdminToolsConfig;
 import ru.terracraft.core.lang.LangKey;
 
 import java.util.Comparator;
@@ -13,15 +14,14 @@ import java.util.List;
 /**
  * /near [radius]
  *
- * Показывает игроков в радиусе (по умолчанию 200 блоков).
- *
- * Право: terracraft.core.near
+ * <p>Радиус по умолчанию — в {@code config.yml}, раздел {@code near}.
+ * Максимум — 500 блоков.
  */
 public class NearCommand {
 
     public static final String PERM = "terracraft.core.near";
 
-    private static final int DEFAULT_RADIUS = 200;
+    private static final int MAX_RADIUS = 500;
 
     private final TerraCorePlugin plugin;
 
@@ -30,11 +30,14 @@ public class NearCommand {
     }
 
     public void register() {
+        AdminToolsConfig.Near cfg = plugin.config().get().near();
+        int defaultRadius = Math.max(1, Math.min(cfg.defaultRadius(), MAX_RADIUS));
+
         new CommandAPICommand("near")
                 .withPermission(PERM)
-                .withOptionalArguments(new IntegerArgument("radius", 1, 500))
+                .withOptionalArguments(new IntegerArgument("radius", 1, MAX_RADIUS))
                 .executesPlayer((player, args) -> {
-                    int radius = (int) args.getOrDefault("radius", DEFAULT_RADIUS);
+                    int radius = (int) args.getOrDefault("radius", defaultRadius);
 
                     List<Player> nearby = player.getWorld().getPlayers().stream()
                             .filter(p -> !p.equals(player))

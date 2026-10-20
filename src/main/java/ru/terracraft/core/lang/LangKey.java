@@ -4,59 +4,95 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Все ключи сообщений TerraCore.
- * Имя enum = ключ в .lang: NO_PERMISSION → no.permission
  *
- * Если добавляешь новое сообщение — сначала добавь сюда, потом в .lang файлы.
+ * <p>Имя enum = ключ в .lang: {@code NO_PERMISSION → no.permission}
+ *
+ * <p>Секции:
+ * <ol>
+ *   <li>Общие</li>
+ *   <li>Мир (current / all)</li>
+ *   <li>God / Fly / Vanish</li>
+ *   <li>Heal / Feed / Speed / Repair</li>
+ *   <li>Enchant / Give / SpawnMob</li>
+ *   <li>Gamemode</li>
+ *   <li>Верстаки / Эндер-сундук / Hat / Clear</li>
+ *   <li>Подтверждения</li>
+ *   <li>Шансы</li>
+ *   <li>Погода / Время / Личное время-погода</li>
+ *   <li>Названия пресетов (время, погода)</li>
+ *   <li>Сервер / Позиция / Информация</li>
+ *   <li>Утилиты (top, jump, more, tree, suicide, burn, ice, ext, skull)</li>
+ *   <li>Игроки (whois, seen, near, list, ping)</li>
+ *   <li>Предметы (itemname, itemlore)</li>
+ *   <li>Направления (compass)</li>
+ *   <li>Форматы времени (seen)</li>
+ *   <li>Кулдаун</li>
+ * </ol>
  */
 public enum LangKey {
 
-    // ============ Общие ============
+    // ============ 1. Общие ============
     PREFIX,
     NO_PERMISSION,
-    PLAYER_ONLY,
     PLAYER_NOT_FOUND,
-    PLAYER_OFFLINE,
     INVALID_ARGUMENT,
     USAGE,
     RELOADED,
     RELOAD_FAILED,
+    INFO_HEADER,
+    INFO_VERSION,
+    INFO_SERVER,
+    INFO_AUTHORS,
 
-    // ============ God ============
+    // ============ 2. Мир (current / all) ============
+    /** «текущий» — мир по умолчанию для /time, /weather. */
+    CURRENT_WORLD,
+    /** «все миры» — для /time all, /weather all. */
+    ALL_WORLDS,
+
+    // ============ 3. God / Fly / Vanish ============
     GOD_ENABLED_SELF,
     GOD_ENABLED_OTHER,
     GOD_DISABLED_SELF,
     GOD_DISABLED_OTHER,
     GOD_RECEIVED_ENABLED,
     GOD_RECEIVED_DISABLED,
+    /** Локализованное имя godmode — для /suicide в god. */
+    GOD_MODE_NAME,
 
-    // ============ Fly ============
     FLY_ENABLED_SELF,
     FLY_ENABLED_OTHER,
     FLY_DISABLED_SELF,
     FLY_DISABLED_OTHER,
     FLY_NOT_ALLOWED_WORLD,
 
-    // ============ Heal ============
+    VANISH_ENABLED,
+    VANISH_DISABLED,
+    VANISH_OTHER_ENABLED,
+    VANISH_OTHER_DISABLED,
+    VANISH_DISABLED_WORLD,
+    VANISH_LIST_HEADER,
+    VANISH_LIST_EMPTY,
+    VANISH_LIST_HOVER,
+
+    // ============ 4. Heal / Feed / Speed / Repair ============
     HEAL_SELF,
     HEAL_OTHER,
     HEAL_RECEIVED,
     HEAL_FAILED,
     HEAL_AMOUNT,
 
-    // ============ Feed ============
     FEED_SELF,
     FEED_OTHER,
     FEED_RECEIVED,
     FEED_FAILED,
     FEED_AMOUNT,
 
-    // ============ Speed ============
     SPEED_SET_WALK,
     SPEED_SET_FLY,
     SPEED_RESET,
     SPEED_INVALID_VALUE,
 
-    // ============ Repair ============
     REPAIR_SUCCESS,
     REPAIR_NO_ITEM,
     REPAIR_FAILED,
@@ -66,28 +102,18 @@ public enum LangKey {
     REPAIR_SUMMARY_BROKEN,
     REPAIR_SUMMARY_FAILED,
 
-    // ============ Enchant / Give ============
+    // ============ 5. Enchant / Give / SpawnMob ============
     ENCHANT_SUCCESS,
     ENCHANT_INVALID,
+    ENCHANT_EMPTY_HAND,
+
     GIVE_SUCCESS,
     GIVE_RECEIVED,
 
-    // ============ SpawnMob ============
     SPAWNMOB_SUCCESS,
     SPAWNMOB_INVALID_TYPE,
-    SPAWNMOB_LIMIT_REACHED,
 
-    // ============ Vanish ============
-    VANISH_ENABLED,
-    VANISH_DISABLED,
-    VANISH_OTHER_ENABLED,
-    VANISH_OTHER_DISABLED,
-    VANISH_DISABLED_WORLD,
-    VANISH_LIST_HEADER,
-    VANISH_LIST_ENTRY,
-    VANISH_LIST_EMPTY,
-
-    // ============ Gamemode ============
+    // ============ 6. Gamemode ============
     GAMEMODE_SET_SELF,
     GAMEMODE_SET_OTHER,
     GAMEMODE_RECEIVED,
@@ -98,19 +124,37 @@ public enum LangKey {
     GAMEMODE_NAME_ADVENTURE,
     GAMEMODE_NAME_SPECTATOR,
 
-    // ============ Workbench / Enderchest / Hat ============
+    // ============ 7. Верстаки / Эндер-сундук / Hat / Clear ============
     WORKBENCH_OPENED,
     WORKBENCH_DISABLED_WORLD,
+    WORKBENCH_TITLE,
+    ANVIL_OPENED,
+    ANVIL_TITLE,
+    LOOM_OPENED,
+    LOOM_TITLE,
+    GRINDSTONE_OPENED,
+    GRINDSTONE_TITLE,
+    STONECUTTER_OPENED,
+    STONECUTTER_TITLE,
+    SMITHINGTABLE_OPENED,
+    SMITHINGTABLE_TITLE,
+
     ENDERCHEST_OPENED_SELF,
     ENDERCHEST_OPENED_OTHER,
     ENDERCHEST_OPENED_FOR_TARGET,
     ENDERCHEST_DISABLED_WORLD,
+
     HAT_SUCCESS,
     HAT_NO_ITEM,
     HAT_RETURNED,
+    HAT_REMOVED,
+    HAT_CANNOT_REMOVE,
+    /** «На голову можно надеть только блок». */
+    HAT_NOT_BLOCK,
 
-    // ============ Подтверждения ============
-    CONFIRM_HEADER,
+    CLEAR_SUCCESS,
+
+    // ============ 8. Подтверждения ============
     CONFIRM_BUTTON_YES,
     CONFIRM_BUTTON_NO,
     CONFIRM_BUTTON_YES_HOVER,
@@ -122,73 +166,96 @@ public enum LangKey {
     CONFIRM_HEAL_HEADER,
     CONFIRM_FEED_HEADER,
 
-    // ============ Шансы ============
+    // ============ 9. Шансы ============
     CHANCE_REPAIR_WARN,
     CHANCE_HEAL_WARN,
     CHANCE_FEED_WARN,
 
-    // ============ Weather ============
+    // ============ 10. Погода / Время / Личное ============
     WEATHER_SET,
     WEATHER_LOCKED,
     WEATHER_UNLOCKED,
-    WEATHER_INVALID,
-    WEATHER_ALREADY,
 
-    // ============ Time ============
     TIME_SET,
     TIME_ADDED,
     TIME_FROZEN,
     TIME_UNFROZEN,
-    TIME_INVALID,
-    TIME_ALREADY,
 
-    // ============ Personal time / weather ============
     PTIME_SET,
     PTIME_RESET,
     PWEATHER_SET,
     PWEATHER_RESET,
 
-    // ============ Server info ============
+    // ============ 11. Названия пресетов ============
+    TIME_NAME_DAY,
+    TIME_NAME_NOON,
+    TIME_NAME_NIGHT,
+    TIME_NAME_MIDNIGHT,
+    TIME_NAME_DAWN,
+    TIME_NAME_DUSK,
+
+    WEATHER_NAME_SUN,
+    WEATHER_NAME_RAIN,
+    WEATHER_NAME_STORM,
+
+    // ============ 12. Сервер / Позиция / Информация ============
+    GC_HEADER,
+    GC_SECTION_SERVER,
+    GC_SECTION_MEMORY,
+    GC_SECTION_WORLD,
+
     GC_TPS,
+    GC_TPS_GOOD,
+    GC_TPS_MEDIUM,
+    GC_TPS_BAD,
+
     GC_MEMORY,
     GC_CHUNKS,
     GC_ENTITIES,
     GC_UPTIME,
-    GC_HEADER,
 
-    // ============ Position ============
+    GC_MB,        // «МБ» / «MB»
+    GC_PERCENT,   // «%» / «%»
+
     GETPOS_SELF,
     GETPOS_OTHER,
-    GETPOS_FORMAT,
     DEPTH_SELF,
     COMPASS_SELF,
 
-    // ============ Utility ============
+    // ============ 13. Утилиты ============
     TOP_SUCCESS,
     TOP_NO_BLOCK,
+
+    JUMP_SUCCESS,
+    JUMP_NO_TARGET,
+
     EXT_SUCCESS,
     EXT_OTHER,
     EXT_NOT_BURNING,
+
     MORE_SUCCESS,
     MORE_NO_ITEM,
     MORE_ALREADY_FULL,
+
     SKULL_SUCCESS,
-    SKULL_GIVEN,
-    SKULL_INVALID,
+
     TREE_SUCCESS,
     TREE_INVALID,
-    TREE_NOT_SAPLING,
-    JUMP_SUCCESS,
-    JUMP_NO_TARGET,
+
     SUICIDE_SUCCESS,
-    SUICIDE_OTHER,
+    SUICIDE_DENIED,
+
     BURN_SUCCESS,
     BURN_OTHER,
+
     ICE_SUCCESS,
     ICE_OTHER,
 
-    // ============ Player info ============
+    // ============ 14. Игроки (whois / seen / near / list / ping) ============
     WHOIS_HEADER,
+    WHOIS_SECTION_MAIN,
+    WHOIS_SECTION_POSITION,
+    WHOIS_SECTION_STATUS,
     WHOIS_NAME,
     WHOIS_UUID,
     WHOIS_WORLD,
@@ -202,14 +269,22 @@ public enum LangKey {
     WHOIS_IP,
     WHOIS_OP,
     WHOIS_FLYING,
+    WHOIS_ONLINE_NOW,
+    WHOIS_UNKNOWN,
+    WHOIS_TRUE,
+    WHOIS_FALSE,
+
+    SEEN_HEADER,
+    SEEN_ONLINE,
+    SEEN_RECENT,
+    SEEN_LONG_AGO,
+    SEEN_LAST_JOIN,
+    SEEN_UNKNOWN,
+    SEEN_JUST_NOW,
 
     NEAR_HEADER,
     NEAR_ENTRY,
     NEAR_EMPTY,
-
-    SEEN_ONLINE,
-    SEEN_RECENT,
-    SEEN_LONG_AGO,
 
     LIST_HEADER,
     LIST_ENTRY,
@@ -217,9 +292,18 @@ public enum LangKey {
 
     PING_SELF,
     PING_OTHER,
-    PING_FORMAT,
 
-    // ============ Items ============
+    // Цветовые пороги пинга — self
+    PING_SELF_GOOD,
+    PING_SELF_MEDIUM,
+    PING_SELF_BAD,
+
+    // Цветовые пороги пинга — other
+    PING_OTHER_GOOD,
+    PING_OTHER_MEDIUM,
+    PING_OTHER_BAD,
+
+    // ============ 15. Предметы ============
     ITEMNAME_SUCCESS,
     ITEMNAME_REMOVED,
     ITEMLORE_ADDED,
@@ -227,32 +311,24 @@ public enum LangKey {
     ITEMLORE_LINE,
     ITEM_INVALID_HAND,
 
-    // ============ Directions ============
+    // ============ 16. Направления (compass) ============
     DIRECTION_NORTH,
     DIRECTION_SOUTH,
     DIRECTION_EAST,
     DIRECTION_WEST,
 
-    // ============ Seen ============
-    SEEN_JUST_NOW,
+    // ============ 17. Форматы времени (seen) ============
     TIME_FORMAT_DAYS,
     TIME_FORMAT_HOURS,
     TIME_FORMAT_MINUTES,
     TIME_FORMAT_SECONDS,
 
-    // ============ Whois ============
-    WHOIS_UNKNOWN,
-    WHOIS_TRUE,
-    WHOIS_FALSE,
+    // ============ 18. Кулдаун ============
+    COOLDOWN_ACTIVE;
 
-    // ============ Misc ============
-    REPAIR_BROKEN_COUNT,
-
-    // ============ Кулдаун ============
-    COOLDOWN_ACTIVE,
-    COOLDOWN_EXPIRED;
-
-    /** Ключ в .lang файле: GOD_ENABLED_SELF → god.enabled.self */
+    /**
+     * Ключ в .lang файле: {@code GOD_ENABLED_SELF → god.enabled.self}.
+     */
     public @NotNull String path() {
         return name().toLowerCase().replace('_', '.');
     }

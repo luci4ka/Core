@@ -1,12 +1,17 @@
 package ru.terracraft.core.command.impl;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.EntitySelectorArgument;
+import dev.jorel.commandapi.arguments.StringArgument;
+import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import ru.terracraft.core.TerraCorePlugin;
 import ru.terracraft.core.config.CommandKey;
 import ru.terracraft.core.lang.LangKey;
+
+import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 public class EnderchestCommand {
 
@@ -20,6 +25,7 @@ public class EnderchestCommand {
     }
 
     public void register() {
+        // /enderchest — себе
         new CommandAPICommand("enderchest")
                 .withAliases("ec", "echest")
                 .withPermission(PERM_SELF)
@@ -31,17 +37,32 @@ public class EnderchestCommand {
                     if (!plugin.cooldowns().check(player, CommandKey.ENDERCHEST)) return;
 
                     player.openInventory(player.getEnderChest());
-                    plugin.msg().send(player, LangKey.ENDERCHEST_OPENED_SELF);
+                    plugin.msg().actionBar(player, LangKey.ENDERCHEST_OPENED_SELF);
+                    plugin.msg().sound(player, Sound.BLOCK_ENDER_CHEST_OPEN, 0.7f, 1.0f);
                 })
                 .register();
 
+        // /enderchest <target>
         new CommandAPICommand("enderchest")
                 .withAliases("ec", "echest")
                 .withPermission(PERM_OTHERS)
-                .withArguments(new EntitySelectorArgument.OnePlayer("target"))
+                .withArguments(new StringArgument("target")
+                        .replaceSuggestions((info, builder) -> {
+                            String prefix = info.currentInput().toLowerCase(Locale.ROOT);
+                            for (Player p : Bukkit.getOnlinePlayers()) {
+                                if (p.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
+                                    builder.suggest(p.getName());
+                                }
+                            }
+                            return CompletableFuture.completedFuture(builder.build());
+                        }))
                 .executesPlayer((player, args) -> {
-                    Player target = (Player) args.get("target");
-                    if (target == null) return;
+                    String name = (String) args.get("target");
+                    Player target = Bukkit.getPlayerExact(name);
+                    if (target == null) {
+                        plugin.msg().send(player, LangKey.PLAYER_NOT_FOUND, "player", name);
+                        return;
+                    }
                     if (isWorldDisabled(target)) {
                         plugin.msg().send(player, LangKey.ENDERCHEST_DISABLED_WORLD);
                         return;
@@ -49,10 +70,18 @@ public class EnderchestCommand {
                     if (!plugin.cooldowns().check(player, CommandKey.ENDERCHEST)) return;
 
                     player.openInventory(target.getEnderChest());
-                    plugin.msg().send(player, LangKey.ENDERCHEST_OPENED_OTHER,
+
+                    plugin.msg().actionBar(player, LangKey.ENDERCHEST_OPENED_OTHER,
                             "player", target.getName());
-                    plugin.msg().send(target, LangKey.ENDERCHEST_OPENED_FOR_TARGET,
-                            "player", player.getName());
+
+                    if (!target.equals(player)) {
+                        plugin.msg().actionBar(target, LangKey.ENDERCHEST_OPENED_FOR_TARGET,
+                                "player", player.getName());
+                        plugin.msg().sound(target, Sound.BLOCK_ENDER_CHEST_OPEN, 0.5f, 1.2f);
+                    }
+
+                    plugin.msg().logAction(player, "/enderchest",
+                            "target", target.getName());
                 })
                 .register();
     }

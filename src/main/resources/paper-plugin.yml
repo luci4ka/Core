@@ -1,16 +1,22 @@
-name: TerraCore
+name: Core
 version: '${version}'
 main: ru.terracraft.core.TerraCorePlugin
 api-version: '1.21'
 authors: [ luci ]
 description: Admin utilities for TerraCraft
+folia-supported: false
 
 dependencies:
   server:
     CommandAPI:
       load: BEFORE
       required: true
-
+      join-classpath: true
     PlaceholderAPI:
       load: BEFORE
       required: false
+      join-classpath: true
+    MineSQL:
+      load: BEFORE
+      required: true
+      join-classpath: true

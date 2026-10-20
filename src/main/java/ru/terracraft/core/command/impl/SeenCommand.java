@@ -4,22 +4,37 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.terracraft.core.TerraCorePlugin;
 import ru.terracraft.core.lang.LangKey;
+import ru.terracraft.core.storage.PlayerCacheService;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * /seen <player>
  *
- * Показывает, когда игрок последний раз был онлайн.
- * Работает и для офлайн-игроков.
- *
- * Право: terracraft.core.seen
+ * <p>Права:
+ * <ul>
+ *   <li>{@link #PERM} — свой последний вход;</li>
+ *   <li>{@link #PERM_OTHERS} — чужой (особенно офлайн).</li>
+ * </ul>
  */
 public class SeenCommand {
 
     public static final String PERM = "terracraft.core.seen";
+    public static final String PERM_OTHERS = "terracraft.core.seen.others";
+
+    private static final long OLD_THRESHOLD_MS = 365L * 24 * 60 * 60 * 1000;
 
     private final TerraCorePlugin plugin;
 
@@ -32,48 +47,99 @@ public class SeenCommand {
                 .withPermission(PERM)
                 .withArguments(new StringArgument("name")
                         .replaceSuggestions((info, builder) -> {
-                            String prefix = info.currentInput().toLowerCase();
+                            String prefix = info.currentInput().toLowerCase(Locale.ROOT);
                             for (Player p : Bukkit.getOnlinePlayers()) {
-                                if (p.getName().toLowerCase().startsWith(prefix)) {
+                                if (p.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
                                     builder.suggest(p.getName());
                                 }
                             }
-                            return java.util.concurrent.CompletableFuture
-                                    .completedFuture(builder.build());
+                            return CompletableFuture.completedFuture(builder.build());
                         }))
                 .executes((sender, args) -> {
                     String name = (String) args.get("name");
+                    if (name == null || name.isBlank()) {
+                        plugin.msg().send(sender, LangKey.INVALID_ARGUMENT, "value", "name");
+                        return;
+                    }
 
-                    // Сначала — онлайн
+                    // Онлайн — базовое право
                     Player online = Bukkit.getPlayerExact(name);
                     if (online != null) {
-                        plugin.msg().send(sender, LangKey.SEEN_ONLINE,
-                                "player", online.getName());
+                        showOnline(sender, online);
                         return;
                     }
 
-                    // Потом — офлайн
-                    OfflinePlayer offline = Bukkit.getOfflinePlayer(name);
-                    if (!offline.hasPlayedBefore()) {
-                        plugin.msg().send(sender, LangKey.PLAYER_NOT_FOUND,
-                                "player", name);
+                    // Офлайн — нужно *.others
+                    if (!sender.hasPermission(PERM_OTHERS)) {
+                        plugin.msg().send(sender, LangKey.NO_PERMISSION);
                         return;
                     }
 
-                    long diff = System.currentTimeMillis() - offline.getLastSeen();
-                    String when = formatDuration(sender, diff);
+                    PlayerCacheService.PlayerData data = findByCache(name);
+                    long lastSeen;
+                    String displayName;
 
-                    plugin.msg().send(sender, LangKey.SEEN_RECENT,
-                            "player", offline.getName(),
-                            "value", when);
+                    if (data != null) {
+                        lastSeen = data.lastSeen();
+                        displayName = data.name();
+                    } else {
+                        OfflinePlayer offline = Bukkit.getOfflinePlayer(name);
+                        if (!offline.hasPlayedBefore()) {
+                            plugin.msg().send(sender, LangKey.PLAYER_NOT_FOUND,
+                                    "player", name);
+                            return;
+                        }
+                        lastSeen = offline.getLastSeen();
+                        displayName = offline.getName() != null ? offline.getName() : name;
+                    }
+
+                    showOffline(sender, displayName, lastSeen);
                 })
                 .register();
     }
 
-    /** Форматирует миллисекунды в «Xд Xч Xм Xс». */
-    private @NotNull String formatDuration(@NotNull Player viewer, long millis) {
+    private void showOnline(@NotNull CommandSender sender, @NotNull Player p) {
+        plugin.msg().sendRaw(sender, LangKey.SEEN_HEADER);
+        plugin.msg().sendRaw(sender, LangKey.SEEN_ONLINE, "player", p.getName());
+        plugin.msg().sendRaw(sender, LangKey.SEEN_HEADER);
+    }
+
+    private void showOffline(@NotNull CommandSender sender,
+                             @NotNull String displayName,
+                             long lastSeen) {
+        Locale locale = senderLocale(sender);
+        long diff = System.currentTimeMillis() - lastSeen;
+
+        boolean tooOld = diff > OLD_THRESHOLD_MS || diff < 0;
+
+        plugin.msg().sendRaw(sender, LangKey.SEEN_HEADER);
+
+        if (tooOld) {
+            plugin.msg().sendRaw(sender, LangKey.SEEN_LONG_AGO, "player", displayName);
+        } else {
+            String when = formatDuration(locale, diff);
+            plugin.msg().sendRaw(sender, LangKey.SEEN_RECENT,
+                    "player", displayName, "value", when);
+            plugin.msg().sendRaw(sender, LangKey.SEEN_LAST_JOIN,
+                    "value", formatExact(lastSeen, locale));
+        }
+
+        plugin.msg().sendRaw(sender, LangKey.SEEN_HEADER);
+    }
+
+    private @Nullable PlayerCacheService.PlayerData findByCache(@NotNull String name) {
+        UUID uuid = plugin.playerCache().findUuidByName(name);
+        if (uuid == null) return null;
+        return plugin.playerCache().get(uuid);
+    }
+
+    private @NotNull Locale senderLocale(@NotNull CommandSender sender) {
+        return (sender instanceof Player p) ? p.locale() : Locale.US;
+    }
+
+    private @NotNull String formatDuration(@NotNull Locale locale, long millis) {
         if (millis < 0) {
-            String s = plugin.lang().raw(viewer.locale(), LangKey.SEEN_JUST_NOW);
+            String s = plugin.lang().raw(locale, LangKey.SEEN_JUST_NOW);
             return s != null ? s : "just now";
         }
 
@@ -90,12 +156,23 @@ public class SeenCommand {
         else if (minutes > 0) { key = LangKey.TIME_FORMAT_MINUTES; main = minutes; rest = seconds % 60; }
         else                  { key = LangKey.TIME_FORMAT_SECONDS; main = seconds; rest = 0; }
 
-        String template = plugin.lang().raw(viewer.locale(), key);
+        String template = plugin.lang().raw(locale, key);
         if (template == null) return main + "s";
 
-        // Заменяем вручную — lang.raw возвращает строку, а не Component
         return template
                 .replace("<value>", String.valueOf(main))
                 .replace("<rest>",  String.valueOf(rest));
+    }
+
+    private @NotNull String formatExact(long millis, @NotNull Locale locale) {
+        if (millis <= 0) {
+            String s = plugin.lang().raw(locale, LangKey.SEEN_UNKNOWN);
+            return s != null ? s : "?";
+        }
+        DateTimeFormatter fmt = DateTimeFormatter
+                .ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+                .withLocale(locale)
+                .withZone(ZoneId.systemDefault());
+        return fmt.format(Instant.ofEpochMilli(millis));
     }
 }

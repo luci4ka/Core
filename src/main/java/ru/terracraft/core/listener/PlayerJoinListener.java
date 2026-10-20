@@ -8,10 +8,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 import ru.terracraft.core.TerraCorePlugin;
+import ru.terracraft.core.command.impl.FlyCommand;
+import ru.terracraft.core.command.impl.GamemodeCommand;
+import ru.terracraft.core.command.impl.GodCommand;
+import ru.terracraft.core.command.impl.VanishCommand;
 
 /**
- * Восстанавливает состояния god / fly / gamemode при входе,
- * если у игрока есть право.
+ * Восстанавливает состояния god / fly / gamemode / vanish при входе.
+ *
+ * <p>Сохранение при выходе — в {@link PlayerQuitListener}.
  */
 public class PlayerJoinListener implements Listener {
 
@@ -25,31 +30,42 @@ public class PlayerJoinListener implements Listener {
     public void onJoin(@NotNull PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
+        plugin.playerCache().record(player);
+
+        // ==== God ====
+        plugin.gods().restore(player);
+        if (plugin.gods().isGod(player) && !player.hasPermission(GodCommand.PERM_SELF)) {
+            plugin.gods().clear(player.getUniqueId());
+        }
+
         // ==== Fly ====
+        plugin.fly().restore(player);
         if (plugin.fly().isFlying(player)) {
-            if (player.hasPermission("terracraft.core.fly")) {
+            if (player.hasPermission(FlyCommand.PERM_SELF)) {
                 player.setAllowFlight(true);
                 player.setFlying(true);
             } else {
-                // Право забрали — чистим, чтобы не залип
                 plugin.fly().clear(player.getUniqueId());
             }
         }
 
-        // ==== God — просто оставляем, урон уже отменяется через GodListener ====
-        if (plugin.gods().isGod(player) && !player.hasPermission("terracraft.core.god")) {
-            plugin.gods().clear(player.getUniqueId());
-        }
-
-        // ==== Gamemode ====
+        // ==== Gamemode — восстановить из БД, затем применить ====
+        plugin.gamemodes().restore(player);
         GameMode saved = plugin.gamemodes().getCurrent(player);
         if (saved != null) {
-            if (player.hasPermission("terracraft.core.gamemode")) {
+            if (player.hasPermission(GamemodeCommand.PERM_SELF)) {
                 player.setGameMode(saved);
             } else {
-                // Право забрали — чистим
                 plugin.gamemodes().clearCurrent(player);
             }
         }
+
+        // ==== Vanish — восстановить из БД + скрыть других vanished от новичка ====
+        plugin.vanish().restore(player);
+        if (plugin.vanish().isVanished(player)
+                && !player.hasPermission(VanishCommand.PERM_SELF)) {
+            plugin.vanish().clear(player.getUniqueId());
+        }
+        plugin.vanish().applyVisibilityForViewer(player);
     }
 }

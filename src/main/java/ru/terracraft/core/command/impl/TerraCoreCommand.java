@@ -1,15 +1,16 @@
 package ru.terracraft.core.command.impl;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.LiteralArgument;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import ru.terracraft.core.TerraCorePlugin;
 import ru.terracraft.core.lang.LangKey;
 
 /**
  * /terracore <reload|info>
- * <p>
- * Алиасы: /tc, /terra
+ *
+ * <p>Алиасы: /tc, /terra
  */
 public class TerraCoreCommand {
 
@@ -36,13 +37,26 @@ public class TerraCoreCommand {
                             } catch (Exception e) {
                                 plugin.msg().send(sender, LangKey.RELOAD_FAILED,
                                         "value", e.getMessage());
+                                plugin.msg().logAction(sender, "/tc reload");
+
+                                if (sender instanceof Player p) plugin.stats().increment(p, "reload");
                                 plugin.getLogger().warning("Ошибка reload: " + e.getMessage());
                             }
                         }))
                 .withSubcommand(new CommandAPICommand("info")
                         .withPermission(PERM_INFO)
                         .executes((sender, args) -> {
-                            sender.sendMessage("TerraCore v" + plugin.getDescription().getVersion());
+                            // Paper 1.21+: getPluginMeta() вместо getDescription()
+                            String version = plugin.getPluginMeta().getVersion();
+                            String server  = Bukkit.getName() + " " + Bukkit.getVersion();
+                            String authors = String.join(", ",
+                                    plugin.getPluginMeta().getAuthors());
+
+                            plugin.msg().sendRaw(sender, LangKey.INFO_HEADER);
+                            plugin.msg().sendRaw(sender, LangKey.INFO_VERSION, "value", version);
+                            plugin.msg().sendRaw(sender, LangKey.INFO_SERVER,  "value", server);
+                            plugin.msg().sendRaw(sender, LangKey.INFO_AUTHORS, "value", authors);
+                            plugin.msg().sendRaw(sender, LangKey.INFO_HEADER);
                         }))
                 .register();
     }

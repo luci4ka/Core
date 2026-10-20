@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -17,21 +18,6 @@ import ru.terracraft.core.TerraCorePlugin;
 import java.time.Duration;
 import java.util.Locale;
 
-/**
- * Отдаёт игроку локализованные сообщения.
- *
- * Использование:
- *   msg.send(player, LangKey.GOD_ENABLED_SELF);
- *   msg.actionBar(player, LangKey.GOD_ENABLED_SELF);
- *   msg.sound(player, Sound.BLOCK_BEACON_ACTIVATE, 0.7f, 1.0f);
- *   msg.confirm(player, LangKey.CONFIRM_REPAIR_HEADER,
- *               "/repair confirm", "/repair cancel", "count", 5);
- *
- * Поведение actionBar / sound / confirm управляется секцией feedback в config.yml:
- *   feedback.action-bar: true|false
- *   feedback.sounds:     true|false
- *   feedback.confirmations: true|false
- */
 public class MessageService {
 
     private static final MiniMessage MM = MiniMessage.miniMessage();
@@ -47,20 +33,23 @@ public class MessageService {
     // ============ Отправка ============
 
     public void send(@NotNull CommandSender sender, @NotNull LangKey key, Object... kv) {
-        Locale locale = (sender instanceof Player p) ? p.locale() : Locale.US;
+        Locale locale = localeOf(sender);
         String body = lang.raw(locale, key);
         if (body == null || body.isEmpty()) return;
 
         String prefix = lang.raw(locale, LangKey.PREFIX);
-        sender.sendMessage(MM.deserialize((prefix == null ? "" : prefix) + body, resolver(kv)));
+        Component msg = MM.deserialize((prefix == null ? "" : prefix) + body, resolver(kv));
+
+        runOnMainThread(() -> sender.sendMessage(msg));
     }
 
-    /** Без префикса — для заголовков, bossbar'ов, кнопок. */
     public void sendRaw(@NotNull CommandSender sender, @NotNull LangKey key, Object... kv) {
-        Locale locale = (sender instanceof Player p) ? p.locale() : Locale.US;
+        Locale locale = localeOf(sender);
         String raw = lang.raw(locale, key);
         if (raw == null || raw.isEmpty()) return;
-        sender.sendMessage(MM.deserialize(raw, resolver(kv)));
+
+        Component msg = MM.deserialize(raw, resolver(kv));
+        runOnMainThread(() -> sender.sendMessage(msg));
     }
 
     public @NotNull Component component(@NotNull Player player, @NotNull LangKey key, Object... kv) {
@@ -70,10 +59,10 @@ public class MessageService {
     }
 
     public @NotNull Component componentPrefixed(@NotNull Player player, @NotNull LangKey key, Object... kv) {
-        String prefix = lang.raw(player.locale(), LangKey.PREFIX);
-        String body   = lang.raw(player.locale(), key);
-        if (body == null) body = "<red>?" + key.path() + "?";
-        return MM.deserialize((prefix == null ? "" : prefix) + body, resolver(kv));
+        return Component.text()
+                .append(lang.component(player, LangKey.PREFIX))
+                .append(lang.component(player, key, kv))
+                .build();
     }
 
     public @NotNull MiniMessage mini() {
@@ -82,20 +71,12 @@ public class MessageService {
 
     // ============ Action bar ============
 
-    /**
-     * Отправляет сообщение в action bar (над хотбаром).
-     *
-     * Если feedback.action-bar = false — падаем на send() в чат.
-     * Если sender — не игрок — тоже в чат.
-     */
     public void actionBar(@NotNull CommandSender sender, @NotNull LangKey key, Object... kv) {
-        // Не игрок — в чат
         if (!(sender instanceof Player player)) {
             send(sender, key, kv);
             return;
         }
 
-        // Отключено в конфиге — в чат
         if (!plugin.config().get().feedback().actionBar()) {
             send(sender, key, kv);
             return;
@@ -104,84 +85,76 @@ public class MessageService {
         Locale locale = player.locale();
         String body = lang.raw(locale, key);
         if (body == null || body.isEmpty()) return;
-        player.sendActionBar(MM.deserialize(body, resolver(kv)));
+
+        Component msg = MM.deserialize(body, resolver(kv));
+        runOnMainThread(() -> player.sendActionBar(msg));
     }
 
     // ============ Sound ============
 
-    /**
-     * Проигрывает звук игроку.
-     *
-     * Если feedback.sounds = false — тихо игнорируется.
-     * Для консоли — игнорируется.
-     */
     public void sound(@NotNull CommandSender sender, @NotNull Sound sound,
                       float volume, float pitch) {
         if (!plugin.config().get().feedback().sounds()) return;
-        if (sender instanceof Player player) {
-            player.playSound(player.getLocation(), sound, volume, pitch);
-        }
+        if (!(sender instanceof Player player)) return;
+
+        runOnMainThread(() ->
+                player.playSound(player.getLocation(), sound, volume, pitch));
     }
 
     // ============ Title ============
 
-    /**
-     * Показывает title и subtitle (по центру экрана).
-     * Если subtitleKey == null — только title.
-     */
     public void title(@NotNull Player player,
                       @NotNull LangKey titleKey,
                       @Nullable LangKey subtitleKey,
                       Object... kv) {
-        Component title = MM.deserialize(lang.raw(player.locale(), titleKey) == null
-                ? "" : lang.raw(player.locale(), titleKey), resolver(kv));
-        Component subtitle = subtitleKey == null
-                ? Component.empty()
-                : MM.deserialize(lang.raw(player.locale(), subtitleKey) == null
-                ? "" : lang.raw(player.locale(), subtitleKey), resolver(kv));
+        String rawTitle = lang.raw(player.locale(), titleKey);
+        String rawSub   = subtitleKey == null ? null : lang.raw(player.locale(), subtitleKey);
 
-        player.showTitle(Title.title(title, subtitle,
+        Component title = MM.deserialize(rawTitle == null ? "" : rawTitle, resolver(kv));
+        Component subtitle = rawSub == null
+                ? Component.empty()
+                : MM.deserialize(rawSub, resolver(kv));
+
+        runOnMainThread(() -> player.showTitle(Title.title(title, subtitle,
                 Title.Times.times(
                         Duration.ofMillis(200),
                         Duration.ofSeconds(2),
-                        Duration.ofMillis(500))));
+                        Duration.ofMillis(500)))));
     }
 
     // ============ Confirm ============
 
-    /**
-     * Отправляет игроку подтверждение с кнопками [Да] [Нет].
-     *
-     * Если feedback.confirmations = false — действие выполняется сразу,
-     * без запроса подтверждения (выполняется confirmCmd).
-     *
-     * @param player       кому показываем
-     * @param titleKey     LangKey заголовка (CONFIRM_REPAIR_HEADER)
-     * @param confirmCmd   команда для клика по [Да] (например, "/repair confirm")
-     * @param cancelCmd    команда для клика по [Нет] (например, "/repair cancel")
-     */
     public void confirm(@NotNull Player player,
                         @NotNull LangKey titleKey,
                         @NotNull String confirmCmd,
                         @NotNull String cancelCmd,
                         Object... kv) {
-        // Подтверждения выключены — сразу выполняем
         if (!plugin.config().get().feedback().confirmations()) {
             String cmd = confirmCmd.startsWith("/") ? confirmCmd.substring(1) : confirmCmd;
-            player.performCommand(cmd);
+            runOnMainThread(() -> player.performCommand(cmd));
             return;
         }
 
         Locale locale = player.locale();
+        String rawHeader = lang.raw(locale, titleKey);
+        String rawYes    = lang.raw(locale, LangKey.CONFIRM_BUTTON_YES);
+        String rawNo     = lang.raw(locale, LangKey.CONFIRM_BUTTON_NO);
+        String rawYesH   = lang.raw(locale, LangKey.CONFIRM_BUTTON_YES_HOVER);
+        String rawNoH    = lang.raw(locale, LangKey.CONFIRM_BUTTON_NO_HOVER);
 
-        Component header = MM.deserialize(lang.raw(locale, titleKey), resolver(kv));
-        Component yes = MM.deserialize(lang.raw(locale, LangKey.CONFIRM_BUTTON_YES))
+        if (rawHeader == null || rawYes == null || rawNo == null) {
+            plugin.getLogger().warning("confirm(): отсутствуют ключи в .lang для " + titleKey);
+            return;
+        }
+
+        Component header = MM.deserialize(rawHeader, resolver(kv));
+        Component yes = MM.deserialize(rawYes)
                 .hoverEvent(HoverEvent.showText(
-                        MM.deserialize(lang.raw(locale, LangKey.CONFIRM_BUTTON_YES_HOVER))))
+                        MM.deserialize(rawYesH == null ? "" : rawYesH)))
                 .clickEvent(ClickEvent.runCommand(confirmCmd));
-        Component no = MM.deserialize(lang.raw(locale, LangKey.CONFIRM_BUTTON_NO))
+        Component no = MM.deserialize(rawNo)
                 .hoverEvent(HoverEvent.showText(
-                        MM.deserialize(lang.raw(locale, LangKey.CONFIRM_BUTTON_NO_HOVER))))
+                        MM.deserialize(rawNoH == null ? "" : rawNoH)))
                 .clickEvent(ClickEvent.runCommand(cancelCmd));
 
         Component line = Component.text()
@@ -192,19 +165,36 @@ public class MessageService {
                 .append(no)
                 .build();
 
-        player.sendMessage(line);
+        runOnMainThread(() -> player.sendMessage(line));
     }
 
-    /** Отправляет подсказку «клик по кнопке» — мелким серым. */
     public void hint(@NotNull Player player, @NotNull LangKey key) {
         Locale locale = player.locale();
         String raw = lang.raw(locale, key);
         if (raw == null || raw.isEmpty()) return;
-        player.sendMessage(MM.deserialize(raw));
+
+        Component msg = MM.deserialize(raw);
+        runOnMainThread(() -> player.sendMessage(msg));
     }
 
     // ============ Внутреннее ============
 
+    private void runOnMainThread(@NotNull Runnable task) {
+        if (Bukkit.isPrimaryThread()) {
+            task.run();
+        } else {
+            Bukkit.getScheduler().runTask(plugin, task);
+        }
+    }
+
+    private @NotNull Locale localeOf(@NotNull CommandSender sender) {
+        return (sender instanceof Player p) ? p.locale() : Locale.US;
+    }
+
+    /**
+     * Резолвер плейсхолдеров. Поддерживает как строки, так и {@link Component}
+     * (для {@code Component.translatable(...)} — имена предметов/сущностей).
+     */
     private @NotNull TagResolver resolver(Object... kv) {
         if (kv.length == 0) return TagResolver.empty();
         if (kv.length % 2 != 0) {
@@ -213,9 +203,38 @@ public class MessageService {
         TagResolver.Builder b = TagResolver.builder();
         for (int i = 0; i < kv.length; i += 2) {
             String name = String.valueOf(kv[i]);
-            String value = String.valueOf(kv[i + 1]);
-            b.resolver(Placeholder.parsed(name, value));
+            Object value = kv[i + 1];
+
+            if (value instanceof Component c) {
+                b.resolver(Placeholder.component(name, c));
+            } else {
+                b.resolver(Placeholder.parsed(name, String.valueOf(value)));
+            }
         }
         return b.build();
+    }
+
+    // ============ Логирование ============
+
+    public void logAction(@NotNull CommandSender sender,
+                          @NotNull String action,
+                          Object... kv) {
+        if (!plugin.config().get().general().logAdminActions()) return;
+
+        String who = (sender instanceof Player p) ? p.getName() : "CONSOLE";
+        String details = formatKv(kv);
+        plugin.getLogger().info("[AdminTools] " + who + " → " + action
+                + (details.isEmpty() ? "" : " (" + details + ")"));
+    }
+
+    private @NotNull String formatKv(Object... kv) {
+        if (kv.length == 0) return "";
+        if (kv.length % 2 != 0) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < kv.length; i += 2) {
+            if (!sb.isEmpty()) sb.append(", ");
+            sb.append(kv[i]).append('=').append(kv[i + 1]);
+        }
+        return sb.toString();
     }
 }

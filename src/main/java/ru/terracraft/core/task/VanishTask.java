@@ -5,17 +5,22 @@ import org.jetbrains.annotations.NotNull;
 import ru.terracraft.core.TerraCorePlugin;
 
 /**
- * Раз в 5 секунд переприменяет видимость vanished-игроков.
+ * Переприменяет видимость vanished-игроков с периодом из config.yml.
  *
- * Это защита от:
- *   - смены прав в LuckPerms без релога
- *   - багов Bukkit при смене мира/респавне
+ * <p>Защита от:
+ * <ul>
+ *   <li>смены прав в LuckPerms без релога;</li>
+ *   <li>багов Bukkit при смене мира/респавне.</li>
+ * </ul>
+ *
+ * <p>Повторный {@link #start()} безопасен — предыдущая задача отменяется.
  */
 public class VanishTask extends BukkitRunnable {
 
-    private static final long PERIOD_TICKS = 20L * 5; // 5 секунд
-
     private final TerraCorePlugin plugin;
+
+    /** Стек-трейс печатается только при первой ошибке — чтобы не спамить лог. */
+    private volatile boolean firstError = true;
 
     public VanishTask(@NotNull TerraCorePlugin plugin) {
         this.plugin = plugin;
@@ -23,15 +28,45 @@ public class VanishTask extends BukkitRunnable {
 
     @Override
     public void run() {
+        if (!plugin.isEnabled()) return;
         if (plugin.vanish().size() == 0) return;
+
         try {
             plugin.vanish().reapplyAll();
         } catch (Exception e) {
             plugin.getLogger().warning("Ошибка VanishTask: " + e.getMessage());
+            if (firstError) {
+                firstError = false;
+                e.printStackTrace();
+            }
         }
     }
 
+    /**
+     * Запустить задачу с периодом из config.yml.
+     * Если период ≤ 0 — задача не запускается.
+     */
     public void start() {
-        runTaskTimer(plugin, PERIOD_TICKS, PERIOD_TICKS);
+        int period = plugin.config().get().vanish().reapplyPeriodTicks();
+        if (period <= 0) {
+            plugin.getLogger().info("VanishTask disabled (vanish.reapplyPeriodTicks = 0).");
+            return;
+        }
+
+        try {
+            cancel();
+        } catch (IllegalStateException ignored) {
+            // Уже отменена
+        }
+        runTaskTimer(plugin, period, period);
+    }
+
+    /** Остановить задачу. */
+    public void stop() {
+        try {
+            cancel();
+        } catch (IllegalStateException ignored) {
+            // Уже отменена
+        }
     }
 }

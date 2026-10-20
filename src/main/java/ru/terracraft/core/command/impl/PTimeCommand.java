@@ -1,22 +1,28 @@
 package ru.terracraft.core.command.impl;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.EntitySelectorArgument;
-import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.MultiLiteralArgument;
+import dev.jorel.commandapi.arguments.StringArgument;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.terracraft.core.TerraCorePlugin;
 import ru.terracraft.core.lang.LangKey;
 
-/**
- * /ptime <day|night|dawn|dusk|reset> [player]
- */
+import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+
 public class PTimeCommand {
 
     public static final String PERM        = "terracraft.core.ptime";
     public static final String PERM_OTHERS = "terracraft.core.ptime.others";
+
+    private static final String[] PRESETS = {
+            "day", "noon", "night", "midnight", "dawn", "dusk", "reset"
+    };
 
     private final TerraCorePlugin plugin;
 
@@ -27,8 +33,7 @@ public class PTimeCommand {
     public void register() {
         new CommandAPICommand("ptime")
                 .withPermission(PERM)
-                .withArguments(new MultiLiteralArgument("preset",
-                        "day", "night", "dawn", "dusk", "reset"))
+                .withArguments(new MultiLiteralArgument("preset", PRESETS))
                 .executesPlayer((player, args) -> {
                     apply(player, player, (String) args.get("preset"));
                 })
@@ -36,33 +41,78 @@ public class PTimeCommand {
 
         new CommandAPICommand("ptime")
                 .withPermission(PERM_OTHERS)
-                .withArguments(new MultiLiteralArgument("preset",
-                        "day", "night", "dawn", "dusk", "reset"))
-                .withArguments(new EntitySelectorArgument.OnePlayer("target"))
+                .withArguments(new MultiLiteralArgument("preset", PRESETS))
+                .withArguments(new StringArgument("target")
+                        .replaceSuggestions((info, builder) -> {
+                            String prefix = info.currentInput().toLowerCase(Locale.ROOT);
+                            for (Player p : Bukkit.getOnlinePlayers()) {
+                                if (p.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
+                                    builder.suggest(p.getName());
+                                }
+                            }
+                            return CompletableFuture.completedFuture(builder.build());
+                        }))
                 .executes((sender, args) -> {
-                    Player target = (Player) args.get("target");
-                    if (target == null) return;
+                    String name = (String) args.get("target");
+                    Player target = Bukkit.getPlayerExact(name);
+                    if (target == null) {
+                        plugin.msg().send(sender, LangKey.PLAYER_NOT_FOUND, "player", name);
+                        return;
+                    }
                     apply(sender, target, (String) args.get("preset"));
                 })
                 .register();
     }
 
-    private void apply(@NotNull org.bukkit.command.CommandSender sender,
+    private void apply(@NotNull CommandSender sender,
                        @NotNull Player target, @NotNull String preset) {
-        if (preset.equals("reset")) {
+        String key = preset.toLowerCase(Locale.ROOT);
+
+        if (key.equals("reset")) {
             target.resetPlayerTime();
             plugin.msg().send(sender, LangKey.PTIME_RESET);
         } else {
-            long ticks = switch (preset) {
-                case "day"   -> 1000L;
-                case "night" -> 13000L;
-                case "dawn"  -> 23000L;
-                case "dusk"  -> 12000L;
-                default -> 1000L;
-            };
+            Long ticks = presetToTicks(key);
+            if (ticks == null) {
+                plugin.msg().send(sender, LangKey.INVALID_ARGUMENT, "value", preset);
+                return;
+            }
             target.setPlayerTime(ticks, false);
-            plugin.msg().send(sender, LangKey.PTIME_SET, "value", preset);
+
+            LangKey nameKey = presetToNameKey(key);
+            String localized = nameKey == null
+                    ? key
+                    : plugin.lang().raw(target.locale(), nameKey);
+            if (localized == null) localized = key;
+
+            plugin.msg().send(sender, LangKey.PTIME_SET,
+                    "value", localized,
+                    "ticks", ticks);
         }
         plugin.msg().sound(target, Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 1.5f);
+    }
+
+    private @Nullable Long presetToTicks(@NotNull String key) {
+        return switch (key) {
+            case "day"      -> 1000L;
+            case "noon"     -> 6000L;
+            case "night"    -> 13000L;
+            case "midnight" -> 18000L;
+            case "dawn"     -> 23000L;
+            case "dusk"     -> 12000L;
+            default -> null;
+        };
+    }
+
+    private @Nullable LangKey presetToNameKey(@NotNull String key) {
+        return switch (key) {
+            case "day"      -> LangKey.TIME_NAME_DAY;
+            case "noon"     -> LangKey.TIME_NAME_NOON;
+            case "night"    -> LangKey.TIME_NAME_NIGHT;
+            case "midnight" -> LangKey.TIME_NAME_MIDNIGHT;
+            case "dawn"     -> LangKey.TIME_NAME_DAWN;
+            case "dusk"     -> LangKey.TIME_NAME_DUSK;
+            default -> null;
+        };
     }
 }

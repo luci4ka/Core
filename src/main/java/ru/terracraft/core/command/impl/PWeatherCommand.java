@@ -1,22 +1,29 @@
 package ru.terracraft.core.command.impl;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.EntitySelectorArgument;
 import dev.jorel.commandapi.arguments.MultiLiteralArgument;
+import dev.jorel.commandapi.arguments.StringArgument;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.WeatherType;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.terracraft.core.TerraCorePlugin;
 import ru.terracraft.core.lang.LangKey;
 
-/**
- * /pweather <sun|rain|reset> [player]
- */
+import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+
 public class PWeatherCommand {
 
     public static final String PERM        = "terracraft.core.pweather";
     public static final String PERM_OTHERS = "terracraft.core.pweather.others";
+
+    private static final String[] PRESETS = {
+            "sun", "rain", "storm", "reset"
+    };
 
     private final TerraCorePlugin plugin;
 
@@ -27,7 +34,7 @@ public class PWeatherCommand {
     public void register() {
         new CommandAPICommand("pweather")
                 .withPermission(PERM)
-                .withArguments(new MultiLiteralArgument("preset", "sun", "rain", "reset"))
+                .withArguments(new MultiLiteralArgument("preset", PRESETS))
                 .executesPlayer((player, args) -> {
                     apply(player, player, (String) args.get("preset"));
                 })
@@ -35,27 +42,65 @@ public class PWeatherCommand {
 
         new CommandAPICommand("pweather")
                 .withPermission(PERM_OTHERS)
-                .withArguments(new MultiLiteralArgument("preset", "sun", "rain", "reset"))
-                .withArguments(new EntitySelectorArgument.OnePlayer("target"))
+                .withArguments(new MultiLiteralArgument("preset", PRESETS))
+                .withArguments(new StringArgument("target")
+                        .replaceSuggestions((info, builder) -> {
+                            String prefix = info.currentInput().toLowerCase(Locale.ROOT);
+                            for (Player p : Bukkit.getOnlinePlayers()) {
+                                if (p.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
+                                    builder.suggest(p.getName());
+                                }
+                            }
+                            return CompletableFuture.completedFuture(builder.build());
+                        }))
                 .executes((sender, args) -> {
-                    Player target = (Player) args.get("target");
-                    if (target == null) return;
+                    String name = (String) args.get("target");
+                    Player target = Bukkit.getPlayerExact(name);
+                    if (target == null) {
+                        plugin.msg().send(sender, LangKey.PLAYER_NOT_FOUND, "player", name);
+                        return;
+                    }
                     apply(sender, target, (String) args.get("preset"));
                 })
                 .register();
     }
 
-    private void apply(@NotNull org.bukkit.command.CommandSender sender,
+    private void apply(@NotNull CommandSender sender,
                        @NotNull Player target, @NotNull String preset) {
-        if (preset.equals("reset")) {
+        String key = preset.toLowerCase(Locale.ROOT);
+
+        if (key.equals("reset")) {
             target.resetPlayerWeather();
             plugin.msg().send(sender, LangKey.PWEATHER_RESET);
         } else {
-            target.setPlayerWeather(preset.equals("sun")
-                    ? WeatherType.CLEAR
-                    : WeatherType.DOWNFALL);
-            plugin.msg().send(sender, LangKey.PWEATHER_SET, "value", preset);
+            WeatherType type = switch (key) {
+                case "sun"  -> WeatherType.CLEAR;
+                case "rain", "storm" -> WeatherType.DOWNFALL;
+                default -> null;
+            };
+            if (type == null) {
+                plugin.msg().send(sender, LangKey.INVALID_ARGUMENT, "value", preset);
+                return;
+            }
+            target.setPlayerWeather(type);
+
+            LangKey nameKey = presetToNameKey(key);
+            String localized = nameKey == null
+                    ? key
+                    : plugin.lang().raw(target.locale(), nameKey);
+            if (localized == null) localized = key;
+
+            plugin.msg().send(sender, LangKey.PWEATHER_SET, "value", localized);
         }
         plugin.msg().sound(target, Sound.ITEM_BUCKET_FILL, 0.5f, 1.5f);
+    }
+
+    private @Nullable LangKey presetToNameKey(@NotNull String key) {
+        return switch (key) {
+            case "sun"   -> LangKey.WEATHER_NAME_SUN;
+            case "rain"  -> LangKey.WEATHER_NAME_RAIN;
+            case "storm" -> LangKey.WEATHER_NAME_STORM;
+            default -> null;
+        };
     }
 }

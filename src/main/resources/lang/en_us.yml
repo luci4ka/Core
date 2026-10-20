@@ -1,0 +1,297 @@
+# ============================================================
+#  TerraCore — English (en_us)
+#  Format: "key": "MiniMessage value"
+#  Keys with dots MUST be quoted.
+# ============================================================
+
+# ============ 1. General ============
+"prefix": " <gradient:#00d4ff:#7b2ff7>Core</gradient><sprite:items:item/emerald><reset>"
+"no.permission": "<red><sprite:gui:container/beacon/cancel> <white>No permission."
+"player.not.found": "<red><sprite:items:item/barrier> <white>Player <player> not found."
+"invalid.argument": "<red><sprite:items:item/barrier> <white>Invalid argument: <value>"
+"usage": "<gray><sprite:items:item/book> <white>Usage: <value>"
+"reloaded": "<green><sprite:gui:container/beacon/confirm> <white>Config reloaded."
+"reload.failed": "<red><sprite:gui:container/beacon/cancel> <white>Reload failed: <value>"
+"info.header": "<dark_gray>========================================"
+"info.version": "<gray>TerraCore <white>v<value>"
+"info.server": "<gray>Server: <white><value>"
+"info.authors": "<gray>Authors: <white><value>"
+
+# ============ 2. World (current / all) ============
+"current.world": "current"
+"all.worlds": "all worlds"
+
+# ============ 3. God / Fly / Vanish ============
+"god.enabled.self": "<green><sprite:items:item/netherite_chestplate> <white>Godmode <green>enabled</green>."
+"god.enabled.other": "<green><sprite:items:item/netherite_chestplate> <white>Godmode granted to <player>."
+"god.disabled.self": "<red><sprite:items:item/netherite_chestplate> <white>Godmode <red>disabled</red>."
+"god.disabled.other": "<red><sprite:items:item/netherite_chestplate> <white>Godmode removed from <player>."
+"god.received.enabled": "<green><sprite:items:item/netherite_chestplate> <white>You have been granted <green>Godmode</green>."
+"god.received.disabled": "<red><sprite:items:item/netherite_chestplate> <white>Your <red>Godmode</red> has been removed."
+"god.mode.name": "<light_purple>Godmode</light_purple>"
+
+"fly.enabled.self": "<green><sprite:items:item/elytra> <white>Flight enabled."
+"fly.enabled.other": "<green><sprite:items:item/elytra> <white>Flight granted to <player>."
+"fly.disabled.self": "<red><sprite:items:item/elytra> <white>Flight disabled."
+"fly.disabled.other": "<red><sprite:items:item/elytra> <white>Flight removed from <player>."
+"fly.not.allowed.world": "<red><sprite:items:item/barrier> <white>Flight is not allowed in this world."
+
+"vanish.enabled": "<green><sprite:items:item/ender_pearl> <white>You are now hidden from other players."
+"vanish.disabled": "<red><sprite:items:item/ender_eye> <white>You are visible again."
+"vanish.other.enabled": "<green><sprite:items:item/ender_pearl> <white>Player <player> is now hidden."
+"vanish.other.disabled": "<green><sprite:items:item/ender_eye> <white>Player <player> is visible again."
+"vanish.disabled.world": "<red><sprite:items:item/barrier> <white>Vanish is not allowed in this world."
+"vanish.list.header": "<gray><sprite:items:item/ender_pearl> <white>Hidden players: <value>"
+"vanish.list.empty": "<gray><sprite:items:item/barrier> <white>No hidden players."
+"vanish.list.hover": "<gray>Click to teleport</gray>"
+
+# ============ 4. Heal / Feed / Speed / Repair ============
+"heal.self": "<green><sprite:items:item/golden_apple> <white>You have been healed."
+"heal.other": "<green><sprite:items:item/golden_apple> <white>Player <player> has been healed."
+"heal.received": "<green><sprite:items:item/golden_apple> <white>You have been healed."
+"heal.failed": "<red><sprite:items:item/barrier> <white>Healing failed."
+"heal.amount": "<green><sprite:items:item/glistering_melon_slice> <white>Restored <value> hearts."
+
+"feed.self": "<green><sprite:items:item/cooked_beef> <white>You have been fed."
+"feed.other": "<green><sprite:items:item/cooked_beef> <white>Player <player> has been fed."
+"feed.received": "<green><sprite:items:item/cooked_beef> <white>You have been fed."
+"feed.failed": "<red><sprite:items:item/barrier> <white>Feeding failed."
+"feed.amount": "<green><sprite:items:item/bread> <white>Restored <value> food."
+
+"speed.set.walk": "<green><sprite:items:item/leather_boots> <white>Walk speed: <value>"
+"speed.set.fly": "<green><sprite:items:item/feather> <white>Fly speed: <value>"
+"speed.reset": "<green><sprite:items:item/sugar> <white>Speed reset."
+"speed.invalid.value": "<red><sprite:items:item/barrier> <white>Invalid value: <value>"
+
+"repair.success": "<green><sprite:items:item/anvil> <white>Items repaired: <value>"
+"repair.no.item": "<red><sprite:items:item/barrier> <white>Nothing to repair."
+"repair.failed": "<red><sprite:items:item/barrier> <white>Repair failed."
+"repair.broken": "<red><sprite:items:item/anvil> <white>Item <item> broke!"
+"repair.summary.header": "<green><sprite:items:item/anvil> <white>Repair complete:"
+"repair.summary.repaired": "<dark_gray>  • <green>Repaired: <white><value>"
+"repair.summary.broken": "<dark_gray>  • <red>Broken: <white><value>"
+"repair.summary.failed": "<dark_gray>  • <yellow>Failed: <white><value>"
+
+# ============ 5. Enchant / Give / SpawnMob ============
+"enchant.success": "<green><sprite:items:item/enchanted_book> <white>Applied <value> level <amount>."
+"enchant.invalid": "<red><sprite:items:item/barrier> <white>Unknown enchantment: <value>"
+"enchant.empty.hand": "<red>Your hand is empty — nothing to enchant.</red>"
+
+"give.success": "<green><sprite:items:item/chest> <white>Gave <value> x<amount> to <player>."
+"give.received": "<green><sprite:items:item/chest> <white>You received <value> x<amount>."
+
+"spawnmob.success": "<green><sprite:items:item/spawner> <white>Spawned <value> x<amount>."
+"spawnmob.invalid.type": "<red><sprite:items:item/barrier> <white>Unknown mob type: <value>"
+
+# ============ 6. Gamemode ============
+"gamemode.set.self": "<green><sprite:items:item/crafting_table> <white>Gamemode: <value>"
+"gamemode.set.other": "<green><sprite:items:item/crafting_table> <white>Gamemode of <player>: <value>"
+"gamemode.received": "<green><sprite:items:item/crafting_table> <white>Your gamemode was set to <value>"
+"gamemode.invalid": "<red><sprite:items:item/barrier> <white>Unknown gamemode: <value>"
+"gamemode.restored": "<green><sprite:items:item/crafting_table> <white>Restored gamemode <value> for <player>"
+"gamemode.name.survival": "Survival"
+"gamemode.name.creative": "Creative"
+"gamemode.name.adventure": "Adventure"
+"gamemode.name.spectator": "Spectator"
+
+# ============ 7. Workstations / Enderchest / Hat / Clear ============
+"workbench.opened": "<green><sprite:items:item/crafting_table> <white>Workbench opened."
+"workbench.disabled.world": "<red><sprite:items:item/barrier> <white>Workbench is not allowed in this world."
+"workbench.title": "<dark_gray>Workbench</dark_gray>"
+"anvil.opened": "<green><sprite:items:item/anvil> <white>Anvil opened."
+"anvil.title": "<dark_gray>Anvil</dark_gray>"
+"loom.opened": "<green><sprite:items:item/loom> <white>Loom opened."
+"loom.title": "<dark_gray>Loom</dark_gray>"
+"grindstone.opened": "<green><sprite:items:item/grindstone> <white>Grindstone opened."
+"grindstone.title": "<dark_gray>Grindstone</dark_gray>"
+"stonecutter.opened": "<green><sprite:items:item/stonecutter> <white>Stonecutter opened."
+"stonecutter.title": "<dark_gray>Stonecutter</dark_gray>"
+"smithingtable.opened": "<green><sprite:items:item/smithing_table> <white>Smithing table opened."
+"smithingtable.title": "<dark_gray>Smithing Table</dark_gray>"
+
+"enderchest.opened.self": "<green><sprite:items:item/ender_chest> <white>Ender chest opened."
+"enderchest.opened.other": "<green><sprite:items:item/ender_chest> <white>Opened ender chest of <player>."
+"enderchest.opened.for.target": "<green><sprite:items:item/ender_chest> <white>Your ender chest was opened for <player>."
+"enderchest.disabled.world": "<red><sprite:items:item/barrier> <white>Ender chest is not allowed in this world."
+
+"hat.success": "<green><sprite:items:item/leather_helmet> <white>Item placed on your head."
+"hat.no.item": "<red><sprite:items:item/barrier> <white>Hold an item in your hand."
+"hat.returned": "<gray><sprite:items:item/leather_helmet> <white>Previous helmet returned to your inventory."
+"hat.removed": "<green><sprite:items:item/leather_helmet> <white>Helmet removed."
+"hat.cannot.remove": "<red><sprite:items:item/barrier> <white>You can't remove your helmet with an empty hand."
+"hat.not.block": "<red><sprite:items:item/barrier> <white>Only blocks can be worn on the head."
+
+"clear.success": "<green><sprite:items:item/bucket> <white>Inventory cleared."
+
+# ============ 8. Confirmations ============
+"confirm.button.yes": "<green><bold>[✔ Yes]</bold></green>"
+"confirm.button.no": "<red><bold>[✘ No]</bold></red>"
+"confirm.button.yes.hover": "<green>Confirm action"
+"confirm.button.no.hover": "<red>Cancel action"
+"confirm.hint": "<dark_gray>You have 30 seconds to confirm."
+"confirm.expired": "<red>Confirmation expired."
+"confirm.cancelled": "<gray>Action cancelled."
+"confirm.repair.header": "<yellow><sprite:items:item/anvil> <white>Repair <gold><count></gold> items?"
+"confirm.heal.header": "<yellow><sprite:items:item/golden_apple> <white>Heal with <gold><chance>%</gold> chance?"
+"confirm.feed.header": "<yellow><sprite:items:item/cooked_beef> <white>Feed with <gold><chance>%</gold> chance?"
+
+# ============ 9. Chances ============
+"chance.repair.warn": "<yellow><sprite:items:item/anvil> <white>Repair chance <gold><chance>%</gold>, break chance <red><break>%</red>."
+"chance.heal.warn": "<yellow><sprite:items:item/golden_apple> <white>Heal chance <gold><chance>%</gold>."
+"chance.feed.warn": "<yellow><sprite:items:item/cooked_beef> <white>Feed chance <gold><chance>%</gold>."
+
+# ============ 10. Weather / Time / Personal ============
+"weather.set": "<green><sprite:items:item/water_bucket> <white>Weather in <world>: <value>"
+"weather.locked": "<yellow><sprite:items:item/water_bucket> <white>Weather locked: <value>"
+"weather.unlocked": "<green><sprite:items:item/bucket> <white>Weather unlocked."
+
+"time.set": "<green><sprite:items:item/clock> <white>Time in <world>: <value>"
+"time.added": "<green><sprite:items:item/clock> <white>Ticks added: <value>"
+"time.frozen": "<yellow><sprite:items:item/clock> <white>Time frozen."
+"time.unfrozen": "<green><sprite:items:item/clock> <white>Time unfrozen."
+
+"ptime.set": "<gray>Personal time:</gray> <white><value></white> <dark_gray>(<gray><ticks> ticks</gray>)</dark_gray>"
+"ptime.reset": "<gray>Personal time</gray> <green>reset</green><gray>.</gray>"
+
+"pweather.set": "<gray>Personal weather:</gray> <value>"
+"pweather.reset": "<gray>Personal weather</gray> <green>reset</green><gray>.</gray>"
+
+# ============ 11. Preset names ============
+"time.name.day": "<yellow>day</yellow>"
+"time.name.noon": "<gold>noon</gold>"
+"time.name.night": "<dark_blue>night</dark_blue>"
+"time.name.midnight": "<dark_gray>midnight</dark_gray>"
+"time.name.dawn": "<light_purple>dawn</light_purple>"
+"time.name.dusk": "<red>dusk</red>"
+
+"weather.name.sun": "<yellow>☀ sun</yellow>"
+"weather.name.rain": "<blue>☂ rain</blue>"
+"weather.name.storm": "<dark_blue>⚡ storm</dark_blue>"
+
+# ============ 12. Server / Position / Info ============
+# ============ 12. Server / Position / Info ============
+"gc.header": "<dark_gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</dark_gray>"
+
+"gc.section.server": "<gray>┌ <white><bold>Server</bold></white></gray>"
+"gc.section.memory": "<gray>├ <white><bold>Memory</bold></white></gray>"
+"gc.section.world":  "<gray>├ <white><bold>World</bold></white></gray>"
+
+"gc.tps": "<gray>│ <dark_gray>•</dark_gray> <white>TPS:</white> <value></gray>"
+"gc.tps.good":   "<gray>│ <dark_gray>•</dark_gray> <white>TPS:</white> <green><value></green> <green>✔</green></gray>"
+"gc.tps.medium": "<gray>│ <dark_gray>•</dark_gray> <white>TPS:</white> <yellow><value></yellow> <yellow>⚠</yellow></gray>"
+"gc.tps.bad":    "<gray>│ <dark_gray>•</dark_gray> <white>TPS:</white> <red><value></red> <red>✘</red></gray>"
+
+"gc.memory": "<gray>│ <dark_gray>•</dark_gray> <white>Memory:</white> <green><used></green> <dark_gray>/</dark_gray> <gray><max></gray> <dark_gray>(<gray><percent>%</gray>)</dark_gray></gray>"
+"gc.chunks":   "<gray>│ <dark_gray>•</dark_gray> <white>Chunks:</white> <gold><value></gold></gray>"
+"gc.entities": "<gray>│ <dark_gray>•</dark_gray> <white>Entities:</white> <gold><value></gold></gray>"
+"gc.uptime":   "<gray>│ <dark_gray>•</dark_gray> <white>Uptime:</white> <aqua><value></aqua></gray>"
+
+"gc.mb": "MB"
+"gc.percent": "%"
+
+"getpos.self": "<green><sprite:items:item/compass> <white>Your position: <gold><x> <y> <z>"
+"getpos.other": "<green><sprite:items:item/compass> <white>Position of <player>: <gold><x> <y> <z>"
+"depth.self": "<green><sprite:items:item/ladder> <white>Depth: <gold><value></gold> blocks above bedrock."
+"compass.self": "<green><sprite:items:item/compass> <white>Direction: <gold><value>"
+
+# ============ 13. Utilities ============
+"top.success": "<green><sprite:items:item/feather> <white>You are at the top (<y>)."
+"top.no.block": "<red><sprite:items:item/barrier> <white>No block above you."
+
+"jump.success": "<green><sprite:items:item/feather> <white>Jumped."
+"jump.no.target": "<red><sprite:items:item/barrier> <white>Too far or no target."
+
+"ext.success": "<green><sprite:items:item/water_bucket> <white>You have been extinguished."
+"ext.other": "<green><sprite:items:item/water_bucket> <white>Player <player> has been extinguished."
+"ext.not.burning": "<yellow><sprite:items:item/water_bucket> <white>Player is not burning."
+
+"more.success": "<green><sprite:items:item/chest> <white>Item replenished to <value>."
+"more.no.item": "<red><sprite:items:item/barrier> <white>Hold an item in your hand."
+"more.already.full": "<yellow><sprite:items:item/chest> <white>Stack is already full."
+
+"skull.success": "<green><sprite:items:item/player_head> <white>Skull of <player> obtained."
+
+"tree.success": "<green><sprite:items:item/oak_sapling> <white>Tree planted."
+"tree.invalid": "<red><sprite:items:item/barrier> <white>Cannot plant a tree here."
+
+"suicide.success": "<red><sprite:items:item/iron_sword> <white>You took your own life."
+"suicide.denied": "<red>You can't do this in mode: <white><value></white>."
+
+"burn.success": "<red><sprite:items:item/flint_and_steel> <white>You have been set on fire."
+"burn.other": "<red><sprite:items:item/flint_and_steel> <white>Player <player> has been set on fire."
+
+"ice.success": "<green><sprite:items:item/blue_ice> <white>You have been frozen."
+"ice.other": "<green><sprite:items:item/blue_ice> <white>Player <player> has been frozen."
+
+# ============ 14. Players (whois / seen / near / list / ping) ============
+"whois.header": "<dark_gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</dark_gray>"
+"whois.section.main": "<gray>┌ <white><bold>Main</bold></white></gray>"
+"whois.section.position": "<gray>├ <white><bold>Position</bold></white></gray>"
+"whois.section.status": "<gray>├ <white><bold>Status</bold></white></gray>"
+"whois.name": "<gray>│ <dark_gray>•</dark_gray> <white>Name:</white> <yellow><value></yellow></gray>"
+"whois.uuid": "<gray>│ <dark_gray>•</dark_gray> <white>UUID:</white> <dark_gray><value></dark_gray></gray>"
+"whois.first.join": "<gray>│ <dark_gray>•</dark_gray> <white>First join:</white> <white><value></white></gray>"
+"whois.last.seen": "<gray>│ <dark_gray>•</dark_gray> <white>Last seen:</white> <white><value></white></gray>"
+"whois.world": "<gray>│ <dark_gray>•</dark_gray> <white>World:</white> <aqua><value></aqua></gray>"
+"whois.position": "<gray>│ <dark_gray>•</dark_gray> <white>Position:</white> <aqua>X: <value_x></aqua> <aqua>Y: <value_y></aqua> <aqua>Z: <value_z></aqua></gray>"
+"whois.health": "<gray>│ <dark_gray>•</dark_gray> <white>Health:</white> <red><value> ❤</red></gray>"
+"whois.food": "<gray>│ <dark_gray>•</dark_gray> <white>Food:</white> <gold><value> 🍗</gold></gray>"
+"whois.gamemode": "<gray>│ <dark_gray>•</dark_gray> <white>Gamemode:</white> <light_purple><value></light_purple></gray>"
+"whois.ping": "<gray>│ <dark_gray>•</dark_gray> <white>Ping:</white> <green><value> ms</green></gray>"
+"whois.ip": "<gray>│ <dark_gray>•</dark_gray> <white>IP:</white> <dark_gray><value></dark_gray></gray>"
+"whois.op": "<gray>│ <dark_gray>•</dark_gray> <white>OP:</white> <value></value></gray>"
+"whois.flying": "<gray>│ <dark_gray>•</dark_gray> <white>Flying:</white> <value></value></gray>"
+"whois.online.now": "<green>currently online</green>"
+"whois.unknown": "<dark_gray>unknown</dark_gray>"
+"whois.true": "<green>✔ yes</green>"
+"whois.false": "<red>✘ no</red>"
+
+"seen.header": "<dark_gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</dark_gray>"
+"seen.online": "<gray>  </gray><green>●</green> <yellow><player></yellow> <dark_gray>—</dark_gray> <green>currently online</green>"
+"seen.recent": "<gray>  </gray><red>○</red> <yellow><player></yellow> <dark_gray>—</dark_gray> <white>last seen <aqua><value></aqua> ago</white>"
+"seen.last.join": "<dark_gray>              last join: <gray><value></gray></dark_gray>"
+"seen.long.ago": "<gray>  </gray><red>○</red> <yellow><player></yellow> <dark_gray>—</dark_gray> <red>a long time ago</red>"
+"seen.unknown": "<dark_gray>unknown</dark_gray>"
+"seen.just.now": "<green>just now</green>"
+
+"near.header": "<gray>Players nearby (<value>):"
+"near.entry": "<gray> • <white><player></white> <gray>(<distance> m)"
+"near.empty": "<yellow>Nobody nearby."
+
+"list.header": "<gray>Online: <white><value>"
+"list.entry": "<gray> • <white><player>"
+"list.empty": "<yellow>Nobody is online."
+
+"ping.self": "<gray>Your ping: <value> ms"
+"ping.other": "<gray>Ping of <player>: <value> ms"
+
+"ping.self.good": "<green>Your ping: <value> ms"
+"ping.self.medium": "<yellow>Your ping: <value> ms"
+"ping.self.bad": "<red>Your ping: <value> ms"
+
+"ping.other.good": "<green>Ping of <player>: <value> ms"
+"ping.other.medium": "<yellow>Ping of <player>: <value> ms"
+"ping.other.bad": "<red>Ping of <player>: <value> ms"
+
+# ============ 15. Items ============
+"itemname.success": "<green><sprite:items:item/name_tag> <white>Item name changed."
+"itemname.removed": "<green><sprite:items:item/name_tag> <white>Item name removed."
+"itemlore.added": "<green><sprite:items:item/writable_book> <white>Lore added."
+"itemlore.cleared": "<green><sprite:items:item/writable_book> <white>Lore cleared."
+"itemlore.line": "<gray> • <white><value>"
+"item.invalid.hand": "<red><sprite:items:item/barrier> <white>Hold an item in your hand."
+
+# ============ 16. Directions ============
+"direction.north": "North"
+"direction.south": "South"
+"direction.east": "East"
+"direction.west": "West"
+
+# ============ 17. Time formats ============
+"time.format.days": "<value>d <rest>h"
+"time.format.hours": "<value>h <rest>m"
+"time.format.minutes": "<value>m <rest>s"
+"time.format.seconds": "<value>s"
+
+# ============ 18. Cooldown ============
+"cooldown.active": "<red><sprite:items:item/clock> <white>Please wait <value> sec."

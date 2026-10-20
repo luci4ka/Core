@@ -1,5 +1,9 @@
 package ru.terracraft.core.lang;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,21 +15,23 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Загрузка .lang файлов и выдача строк по локали игрока.
+ * Загрузчик плоских .yml-файлов локализации.
  *
- * Ищет файлы:
- *   1. В JAR: resources/lang/<code>.lang
- *   2. В plugins/TerraCore/lang/<code>.lang  (перекрывают встроенные)
+ * <p>Формат (ключи с точками <b>квотированы</b>):
+ * <pre>
+ *   "prefix": "&lt;gray&gt;[TerraCore] &lt;reset&gt;"
+ *   "no.permission": "&lt;red&gt;Нет доступа."
+ *   "god.enabled.self": "&lt;green&gt;Godmode включён."
+ * </pre>
  *
- * При загрузке в пользовательский файл ДОПИСЫВАЮТСЯ ключи,
- * которые есть во встроенном, но отсутствуют в пользовательском.
- * Существующие значения НЕ трогаются.
+ * <p>Ищет файлы:
+ * <ol>
+ *   <li>В JAR: {@code resources/lang/<code>.yml}</li>
+ *   <li>В {@code plugins/TerraCore/lang/<code>.yml} (перекрывают встроенные)</li>
+ * </ol>
  *
- * Каскад получения строки для локали игрока:
- *   1. Точное совпадение локали (ru_RU → ru_RU).
- *   2. Тот же язык, другой регион (ru_UA → ru_RU, en_GB → en_US).
- *   3. Регион из СНГ → ru_ru.
- *   4. Всё остальное → en_us (fallback).
+ * <p>Drop-in: любой новый {@code <lang>.yml} в {@code plugins/TerraCore/lang/}
+ * автоматически подхватывается. Локаль выбирается по клиенту ({@link Player#locale()}).
  */
 public class LangManager {
 
@@ -35,9 +41,9 @@ public class LangManager {
 
     private static final Locale CIS_FALLBACK = new Locale("ru", "RU");
     private static final Locale DEFAULT_FALLBACK = Locale.US;
-
-    /** Языки, для которых всегда есть встроенный .lang в JAR. */
-    private static final List<String> BUILT_IN = List.of("en_us", "ru_ru");
+    private static final String FILE_EXT = ".yml";
+    private static final String BUILT_IN_EN = "en_us";
+    private static final String BUILT_IN_RU = "ru_ru";
 
     private final TerraCorePlugin plugin;
 
@@ -54,116 +60,172 @@ public class LangManager {
         translations.clear();
         byLanguage.clear();
 
-        // 1. Загрузить встроенные из JAR в память (нужны как эталон для дописывания)
+        // 1. Создать lang/
+        File langDir = new File(plugin.getDataFolder(), "lang");
+        if (!langDir.exists() && !langDir.mkdirs()) {
+            plugin.getLogger().warning("Failed to create lang/ directory");
+            return;
+        }
+
+        // 2. Встроенные из JAR — эталон для дописывания
         Map<String, Map<String, String>> builtIn = new HashMap<>();
-        for (String code : BUILT_IN) {
-            Map<String, String> map = readBuiltIn(code);
-            if (map != null) {
-                builtIn.put(code, map);
-                translations.put(localeOf(code), map);
+        for (String code : new String[]{BUILT_IN_EN, BUILT_IN_RU}) {
+            Map<String, String> map = readFromJar(code);
+            if (map != null) builtIn.put(code, map);
+        }
+
+        // 3. Создать/дополнить файлы на диске
+        for (var entry : builtIn.entrySet()) {
+            String code = entry.getKey();
+            Map<String, String> jarMap = entry.getValue();
+            File file = new File(langDir, code + FILE_EXT);
+
+            if (!file.exists()) {
+                saveLangFile(file, jarMap);
+                plugin.getLogger().info("Created " + file.getName() + " from JAR");
+            } else {
+                Map<String, String> userMap = readLangFile(file);
+                boolean changed = addMissingKeys(userMap, jarMap);
+                if (changed) {
+                    saveLangFile(file, userMap);
+                    plugin.getLogger().info("Updated " + file.getName() + " with new keys");
+                }
             }
         }
 
-        // 2. Загрузить пользовательские и дописать недостающие ключи
-        loadCustom(builtIn);
+        // 4. Загрузить ВСЕ .yml из lang/ (включая drop-in)
+        File[] files = langDir.listFiles((dir, name) -> name.endsWith(FILE_EXT));
+        if (files != null) {
+            for (File f : files) {
+                String code = f.getName().substring(0, f.getName().length() - FILE_EXT.length());
+                Locale locale = localeOf(code);
+                translations.put(locale, readLangFile(f));
+                plugin.getLogger().info("Loaded locale: " + locale.toLanguageTag()
+                        + " (" + f.getName() + ")");
+            }
+        }
 
-        // 3. Индекс по языкам
+        // 5. Индекс по языкам
         rebuildLanguageIndex();
 
-        // 4. Валидация (проверит, что fallback-локаль полна)
+        // 6. Валидация fallback
         validateKeys();
 
-        plugin.getLogger().info("Загружено языков: " + translations.size()
-                + " (" + translations.keySet().stream()
-                .map(Locale::toLanguageTag)
-                .sorted()
-                .toList() + ")");
+        plugin.getLogger().info("Locales loaded: " + translations.size()
+                + " — " + translations.keySet().stream()
+                .map(Locale::toLanguageTag).sorted().toList());
     }
 
-    /** Читает встроенный .lang из JAR. null, если нет. */
-    private @Nullable Map<String, String> readBuiltIn(@NotNull String code) {
-        String resource = "lang/" + code + ".lang";
+    // ============ Чтение ============
+
+    private @Nullable Map<String, String> readFromJar(@NotNull String code) {
+        String resource = "lang/" + code + FILE_EXT;
         try (InputStream is = plugin.getResource(resource)) {
             if (is == null) {
-                plugin.getLogger().warning("Встроенный перевод не найден: " + resource);
+                plugin.getLogger().warning("Built-in lang not found: " + resource);
                 return null;
             }
-            return parse(new InputStreamReader(is, StandardCharsets.UTF_8));
+            return parseFlatYaml(is);
         } catch (Exception e) {
-            plugin.getLogger().warning("Ошибка загрузки " + resource + ": " + e.getMessage());
+            plugin.getLogger().warning("Failed to load " + resource + ": " + e.getMessage());
             return null;
         }
     }
 
-    /**
-     * Загружает пользовательские .lang из plugins/TerraCore/lang/.
-     * Если файла нет — создаёт из встроенного.
-     * Если в файле нет ключей, которые есть во встроенном — дописывает их.
-     */
-    private void loadCustom(@NotNull Map<String, Map<String, String>> builtIn) {
-        File langDir = new File(plugin.getDataFolder(), "lang");
-        if (!langDir.exists() && !langDir.mkdirs()) {
-            plugin.getLogger().warning("Не удалось создать папку lang/");
-            return;
-        }
-
-        // Для каждого встроенного языка — убедиться, что файл на диске полон
-        for (String code : BUILT_IN) {
-            File file = new File(langDir, code + ".lang");
-            Map<String, String> jarMap = builtIn.get(code);
-
-            if (!file.exists()) {
-                // Файла нет — сохраняем встроенный
-                if (jarMap != null) {
-                    saveLangFile(file, jarMap);
-                }
-                continue;
-            }
-
-            // Файл есть — читаем, дополняем, сохраняем если что-то добавилось
-            Map<String, String> userMap = readLangFile(file);
-            if (jarMap != null) {
-                boolean changed = addMissingKeys(userMap, jarMap);
-                if (changed) {
-                    saveLangFile(file, userMap);
-                    plugin.getLogger().info("Дополнен " + file.getName()
-                            + " новыми ключами из JAR");
-                }
-            }
-
-            // Пользовательский вариант важнее встроенного
-            translations.put(localeOf(code), userMap);
-        }
-
-        // Дополнительные пользовательские языки (не из BUILT_IN)
-        File[] files = langDir.listFiles((dir, name) -> name.endsWith(".lang"));
-        if (files == null) return;
-
-        for (File f : files) {
-            String code = f.getName().substring(0, f.getName().length() - ".lang".length());
-            if (BUILT_IN.contains(code)) continue;   // уже обработали
-
-            Map<String, String> map = readLangFile(f);
-            translations.put(localeOf(code), map);
-        }
-    }
-
-    /** Читает .lang файл с диска. */
     private @NotNull Map<String, String> readLangFile(@NotNull File file) {
         try (InputStream is = new FileInputStream(file)) {
-            return parse(new InputStreamReader(is, StandardCharsets.UTF_8));
+            return parseFlatYaml(is);
         } catch (Exception e) {
-            plugin.getLogger().warning("Ошибка загрузки " + file.getName() + ": " + e.getMessage());
+            plugin.getLogger().warning("Failed to load " + file.getName() + ": " + e.getMessage());
             return new LinkedHashMap<>();
         }
     }
 
     /**
-     * Дописывает в userMap ключи из jarMap, которых нет в userMap.
-     * Существующие значения не трогает.
-     *
-     * @return true, если что-то добавилось
+     * Парсит плоский YAML: каждая строка — {@code "key": "value"}.
      */
+    private @NotNull Map<String, String> parseFlatYaml(@NotNull InputStream is) {
+        Map<String, String> map = new LinkedHashMap<>();
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            String line;
+            int lineNum = 0;
+            while ((line = br.readLine()) != null) {
+                lineNum++;
+                String trimmed = line.trim();
+                if (trimmed.isEmpty() || trimmed.startsWith("#")) continue;
+
+                int keyEnd = findKeyEnd(trimmed);
+                if (keyEnd < 0) {
+                    plugin.getLogger().warning("Malformed line " + lineNum + ": " + trimmed);
+                    continue;
+                }
+
+                String rawKey = trimmed.substring(0, keyEnd).trim();
+                String rawValue = trimmed.substring(keyEnd + 1).trim();
+
+                String key = unquote(rawKey);
+                String value = unquote(rawValue);
+                if (key.isEmpty()) continue;
+
+                map.put(key, value);
+            }
+        } catch (IOException e) {
+            plugin.getLogger().warning("I/O error parsing YAML: " + e.getMessage());
+        }
+        return map;
+    }
+
+    /** Индекс первого {@code :} вне кавычек. */
+    private int findKeyEnd(@NotNull String s) {
+        boolean inSingle = false, inDouble = false;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '\'' && !inDouble) inSingle = !inSingle;
+            else if (c == '"' && !inSingle) inDouble = !inDouble;
+            else if (c == ':' && !inSingle && !inDouble) return i;
+        }
+        return -1;
+    }
+
+    /** Убирает обрамляющие кавычки и разэкранирует. */
+    private @NotNull String unquote(@NotNull String s) {
+        if (s.length() >= 2) {
+            char first = s.charAt(0);
+            char last = s.charAt(s.length() - 1);
+            if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
+                s = s.substring(1, s.length() - 1);
+                if (first == '"') {
+                    s = s.replace("\\\"", "\"").replace("\\\\", "\\");
+                }
+            }
+        }
+        return s;
+    }
+
+    // ============ Сохранение ============
+
+    private void saveLangFile(@NotNull File file, @NotNull Map<String, String> map) {
+        try (Writer w = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+            w.write("# TerraCore language file (flat format)\n");
+            w.write("# Each line: \"key\": \"MiniMessage value\"\n");
+            w.write("# Keys with dots MUST be quoted.\n\n");
+            for (var entry : map.entrySet()) {
+                w.write('"');
+                w.write(escape(entry.getKey()));
+                w.write("\": \"");
+                w.write(escape(entry.getValue()));
+                w.write("\"\n");
+            }
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to save " + file.getName() + ": " + e.getMessage());
+        }
+    }
+
+    private @NotNull String escape(@NotNull String s) {
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
     private boolean addMissingKeys(@NotNull Map<String, String> userMap,
                                    @NotNull Map<String, String> jarMap) {
         boolean changed = false;
@@ -176,24 +238,6 @@ public class LangManager {
         return changed;
     }
 
-    /** Сохраняет .lang файл, группируя по секциям (# ====). */
-    private void saveLangFile(@NotNull File file, @NotNull Map<String, String> map) {
-        try (Writer w = new OutputStreamWriter(
-                new FileOutputStream(file), StandardCharsets.UTF_8)) {
-
-            // Сохраняем порядок ключей из map (он LinkedHashMap)
-            for (var entry : map.entrySet()) {
-                w.write(entry.getKey());
-                w.write('=');
-                w.write(entry.getValue());
-                w.write('\n');
-            }
-        } catch (IOException e) {
-            plugin.getLogger().warning("Не удалось сохранить " + file.getName()
-                    + ": " + e.getMessage());
-        }
-    }
-
     private void rebuildLanguageIndex() {
         for (Locale locale : translations.keySet()) {
             byLanguage.merge(locale.getLanguage(), locale, (a, b) ->
@@ -201,29 +245,10 @@ public class LangManager {
         }
     }
 
-    private Map<String, String> parse(@NotNull InputStreamReader reader) {
-        Map<String, String> map = new LinkedHashMap<>();
-        try (BufferedReader br = new BufferedReader(reader)) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String trimmed = line.trim();
-                if (trimmed.isEmpty() || trimmed.startsWith("#")) continue;
-                int eq = trimmed.indexOf('=');
-                if (eq < 0) continue;
-                String key = trimmed.substring(0, eq).trim();
-                String value = trimmed.substring(eq + 1).trim();
-                map.put(key, value);
-            }
-        } catch (IOException ignored) {}
-        return map;
-    }
-
     private void validateKeys() {
         Map<String, String> fallbackMap = translations.get(DEFAULT_FALLBACK);
         if (fallbackMap == null) {
-            plugin.getLogger().severe("Нет fallback-локали "
-                    + DEFAULT_FALLBACK.toLanguageTag()
-                    + " — сообщения работать не будут.");
+            plugin.getLogger().severe("No fallback locale " + DEFAULT_FALLBACK.toLanguageTag());
             return;
         }
         List<String> missing = new ArrayList<>();
@@ -233,8 +258,8 @@ public class LangManager {
             }
         }
         if (!missing.isEmpty()) {
-            plugin.getLogger().warning("В " + DEFAULT_FALLBACK.toLanguageTag()
-                    + ".lang отсутствуют ключи: " + String.join(", ", missing));
+            plugin.getLogger().warning("Missing keys in " + DEFAULT_FALLBACK.toLanguageTag()
+                    + ": " + String.join(", ", missing));
         }
     }
 
@@ -262,6 +287,22 @@ public class LangManager {
 
     public @Nullable String raw(@NotNull Player player, @NotNull LangKey key) {
         return raw(player.locale(), key);
+    }
+
+    public @NotNull Component component(@NotNull Player player,
+                                        @NotNull LangKey key,
+                                        Object... kv) {
+        String raw = raw(player.locale(), key);
+        if (raw == null) raw = "<red>?" + key.path() + "?";
+        return MiniMessage.miniMessage().deserialize(raw, resolver(kv));
+    }
+
+    public @NotNull Component component(@NotNull Locale locale,
+                                        @NotNull LangKey key,
+                                        Object... kv) {
+        String raw = raw(locale, key);
+        if (raw == null) raw = "<red>?" + key.path() + "?";
+        return MiniMessage.miniMessage().deserialize(raw, resolver(kv));
     }
 
     public boolean hasKey(@NotNull Locale locale, @NotNull LangKey key) {
@@ -299,5 +340,28 @@ public class LangManager {
                 ? new Locale(parts[0].toLowerCase(Locale.ROOT),
                 parts[1].toUpperCase(Locale.ROOT))
                 : Locale.forLanguageTag(code.replace('_', '-'));
+    }
+
+    /**
+     * Резолвер плейсхолдеров. Поддерживает как строки, так и {@link Component}
+     * (для {@code Component.translatable(...)} — имена предметов/сущностей).
+     */
+    private @NotNull TagResolver resolver(Object... kv) {
+        if (kv.length == 0) return TagResolver.empty();
+        if (kv.length % 2 != 0) {
+            throw new IllegalArgumentException("Expected even number of key/value arguments, got: " + kv.length);
+        }
+        TagResolver.Builder b = TagResolver.builder();
+        for (int i = 0; i < kv.length; i += 2) {
+            String name = String.valueOf(kv[i]);
+            Object value = kv[i + 1];
+
+            if (value instanceof Component c) {
+                b.resolver(Placeholder.component(name, c));
+            } else {
+                b.resolver(Placeholder.parsed(name, String.valueOf(value)));
+            }
+        }
+        return b.build();
     }
 }

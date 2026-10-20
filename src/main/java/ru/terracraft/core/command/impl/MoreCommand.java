@@ -43,8 +43,11 @@ public class MoreCommand {
                     }
 
                     item.setAmount(max);
-                    plugin.msg().actionBar(player, LangKey.MORE_SUCCESS, "value", max);
+
+                    // Чат — информация важна дольше 2 секунд
+                    plugin.msg().send(player, LangKey.MORE_SUCCESS, "value", max);
                     plugin.msg().sound(player, Sound.ENTITY_ITEM_PICKUP, 0.5f, 1.2f);
+                    plugin.msg().logAction(player, "/more", "value", max);
                 })
                 .register();
     }

@@ -1,0 +1,297 @@
+# ============================================================
+#  TerraCore — русский язык (ru_ru)
+#  Формат: "key": "MiniMessage value"
+#  Ключи с точками ОБЯЗАТЕЛЬНО в кавычках.
+# ============================================================
+
+# ============ 1. Общие ============
+"prefix": " <gradient:#00d4ff:#7b2ff7>Core</gradient><sprite:items:item/emerald><reset>"
+"no.permission": "<red><sprite:gui:container/beacon/cancel> <white>Нет доступа."
+"player.not.found": "<red><sprite:items:item/barrier> <white>Игрок <player> не найден."
+"invalid.argument": "<red><sprite:items:item/barrier> <white>Неверный аргумент: <value>"
+"usage": "<gray><sprite:items:item/book> <white>Использование: <value>"
+"reloaded": "<green><sprite:gui:container/beacon/confirm> <white>Конфиг перезагружен."
+"reload.failed": "<red><sprite:gui:container/beacon/cancel> <white>Ошибка перезагрузки: <value>"
+"info.header": "<dark_gray>========================================"
+"info.version": "<gray>TerraCore <white>v<value>"
+"info.server": "<gray>Сервер: <white><value>"
+"info.authors": "<gray>Авторы: <white><value>"
+
+# ============ 2. Мир (current / all) ============
+"current.world": "текущий"
+"all.worlds": "все миры"
+
+
+# ============ 3. God / Fly / Vanish ============
+"god.enabled.self": "<green><sprite:items:item/netherite_chestplate> <white>Godmode <green>включён</green>."
+"god.enabled.other": "<green><sprite:items:item/netherite_chestplate> <white>Godmode выдан игроку <player>."
+"god.disabled.self": "<red><sprite:items:item/netherite_chestplate> <white>Godmode <red>выключен</red>."
+"god.disabled.other": "<red><sprite:items:item/netherite_chestplate> <white>Godmode снят с <player>."
+"god.received.enabled": "<green><sprite:items:item/netherite_chestplate> <white>Вам выдан <green>Godmode</green>."
+"god.received.disabled": "<red><sprite:items:item/netherite_chestplate> <white>С вас снят <red>Godmode</red>."
+"god.mode.name": "<light_purple>Godmode</light_purple>"
+
+"fly.enabled.self": "<green><sprite:items:item/elytra> <white>Полёт включён."
+"fly.enabled.other": "<green><sprite:items:item/elytra> <white>Полёт выдан <player>."
+"fly.disabled.self": "<red><sprite:items:item/elytra> <white>Полёт выключен."
+"fly.disabled.other": "<red><sprite:items:item/elytra> <white>Полёт снят с <player>."
+"fly.not.allowed.world": "<red><sprite:items:item/barrier> <white>Полёт запрещён в этом мире."
+
+"vanish.enabled": "<green><sprite:items:item/ender_pearl> <white>Вы скрыты от других игроков."
+"vanish.disabled": "<red><sprite:items:item/ender_eye> <white>Вы снова видимы."
+"vanish.other.enabled": "<green><sprite:items:item/ender_pearl> <white>Игрок <player> скрыт."
+"vanish.other.disabled": "<green><sprite:items:item/ender_eye> <white>Игрок <player> снова видим."
+"vanish.disabled.world": "<red><sprite:items:item/barrier> <white>Vanish запрещён в этом мире."
+"vanish.list.header": "<gray><sprite:items:item/ender_pearl> <white>Скрытых игроков: <value>"
+"vanish.list.empty": "<gray><sprite:items:item/barrier> <white>Скрытых игроков нет."
+"vanish.list.hover": "<gray>Нажми, чтобы телепортироваться</gray>"
+
+# ============ 4. Heal / Feed / Speed / Repair ============
+"heal.self": "<green><sprite:items:item/golden_apple> <white>Вы исцелены."
+"heal.other": "<green><sprite:items:item/golden_apple> <white>Игрок <player> исцелён."
+"heal.received": "<green><sprite:items:item/golden_apple> <white>Вас исцелили."
+"heal.failed": "<red><sprite:items:item/barrier> <white>Исцеление не удалось."
+"heal.amount": "<green><sprite:items:item/glistering_melon_slice> <white>Восстановлено <value> сердец."
+
+"feed.self": "<green><sprite:items:item/cooked_beef> <white>Вы насытились."
+"feed.other": "<green><sprite:items:item/cooked_beef> <white>Игрок <player> накормлен."
+"feed.received": "<green><sprite:items:item/cooked_beef> <white>Вас накормили."
+"feed.failed": "<red><sprite:items:item/barrier> <white>Насыщение не удалось."
+"feed.amount": "<green><sprite:items:item/bread> <white>Восстановлено <value> еды."
+
+"speed.set.walk": "<green><sprite:items:item/leather_boots> <white>Скорость ходьбы: <value>"
+"speed.set.fly": "<green><sprite:items:item/feather> <white>Скорость полёта: <value>"
+"speed.reset": "<green><sprite:items:item/sugar> <white>Скорость сброшена."
+"speed.invalid.value": "<red><sprite:items:item/barrier> <white>Недопустимое значение: <value>"
+
+"repair.success": "<green><sprite:items:item/anvil> <white>Починено предметов: <value>"
+"repair.no.item": "<red><sprite:items:item/barrier> <white>Нечего чинить."
+"repair.failed": "<red><sprite:items:item/barrier> <white>Починка не удалась."
+"repair.broken": "<red><sprite:items:item/anvil> <white>Предмет <item> сломался!"
+"repair.summary.header": "<green><sprite:items:item/anvil> <white>Починка завершена:"
+"repair.summary.repaired": "<dark_gray>  • <green>Починено: <white><value>"
+"repair.summary.broken": "<dark_gray>  • <red>Сломано: <white><value>"
+"repair.summary.failed": "<dark_gray>  • <yellow>Неудачно: <white><value>"
+
+# ============ 5. Enchant / Give / SpawnMob ============
+"enchant.success": "<green><sprite:items:item/enchanted_book> <white>Наложен <value> уровня <amount>."
+"enchant.invalid": "<red><sprite:items:item/barrier> <white>Неизвестный энчант: <value>"
+"enchant.empty.hand": "<red>В руке пусто — нечего зачаровать.</red>"
+
+"give.success": "<green><sprite:items:item/chest> <white>Выдано <value> x<amount> игроку <player>."
+"give.received": "<green><sprite:items:item/chest> <white>Вы получили <value> x<amount>."
+
+"spawnmob.success": "<green><sprite:items:item/spawner> <white>Заспавнено <value> x<amount>."
+"spawnmob.invalid.type": "<red><sprite:items:item/barrier> <white>Неизвестный тип моба: <value>"
+
+# ============ 6. Gamemode ============
+"gamemode.set.self": "<green><sprite:items:item/crafting_table> <white>Режим: <value>"
+"gamemode.set.other": "<green><sprite:items:item/crafting_table> <white>Режим игрока <player>: <value>"
+"gamemode.received": "<green><sprite:items:item/crafting_table> <white>Вам установлен режим: <value>"
+"gamemode.invalid": "<red><sprite:items:item/barrier> <white>Неизвестный режим: <value>"
+"gamemode.restored": "<green><sprite:items:item/crafting_table> <white>Возвращён режим <value> для <player>"
+"gamemode.name.survival": "Выживание"
+"gamemode.name.creative": "Креатив"
+"gamemode.name.adventure": "Приключение"
+"gamemode.name.spectator": "Наблюдатель"
+
+# ============ 7. Верстаки / Эндер-сундук / Hat / Clear ============
+"workbench.opened": "<green><sprite:items:item/crafting_table> <white>Верстак открыт."
+"workbench.disabled.world": "<red><sprite:items:item/barrier> <white>Верстак запрещён в этом мире."
+"workbench.title": "<dark_gray>Верстак</dark_gray>"
+"anvil.opened": "<green><sprite:items:item/anvil> <white>Наковальня открыта."
+"anvil.title": "<dark_gray>Наковальня</dark_gray>"
+"loom.opened": "<green><sprite:items:item/loom> <white>Ткацкий станок открыт."
+"loom.title": "<dark_gray>Ткацкий станок</dark_gray>"
+"grindstone.opened": "<green><sprite:items:item/grindstone> <white>Точильный камень открыт."
+"grindstone.title": "<dark_gray>Точильный камень</dark_gray>"
+"stonecutter.opened": "<green><sprite:items:item/stonecutter> <white>Камнерез открыт."
+"stonecutter.title": "<dark_gray>Камнерез</dark_gray>"
+"smithingtable.opened": "<green><sprite:items:item/smithing_table> <white>Стол кузнеца открыт."
+"smithingtable.title": "<dark_gray>Кузнечный стол</dark_gray>"
+
+"enderchest.opened.self": "<green><sprite:items:item/ender_chest> <white>Эндер-сундук открыт."
+"enderchest.opened.other": "<green><sprite:items:item/ender_chest> <white>Открыт эндер-сундук игрока <player>."
+"enderchest.opened.for.target": "<green><sprite:items:item/ender_chest> <white>Ваш эндер-сундук открыт для <player>."
+"enderchest.disabled.world": "<red><sprite:items:item/barrier> <white>Эндер-сундук запрещён в этом мире."
+
+"hat.success": "<green><sprite:items:item/leather_helmet> <white>Предмет надет на голову."
+"hat.no.item": "<red><sprite:items:item/barrier> <white>Возьмите предмет в руку."
+"hat.returned": "<gray><sprite:items:item/leather_helmet> <white>Предыдущий шлем возвращён в инвентарь."
+"hat.removed": "<green><sprite:items:item/leather_helmet> <white>Шлем снят."
+"hat.cannot.remove": "<red><sprite:items:item/barrier> <white>Нельзя снять шлем пустой рукой."
+"hat.not.block": "<red><sprite:items:item/barrier> <white>На голову можно надеть только блок."
+
+"clear.success": "<green><sprite:items:item/bucket> <white>Инвентарь очищен."
+
+# ============ 8. Подтверждения ============
+"confirm.button.yes": "<green><bold>[✔ Да]</bold></green>"
+"confirm.button.no": "<red><bold>[✘ Нет]</bold></red>"
+"confirm.button.yes.hover": "<green>Подтвердить действие"
+"confirm.button.no.hover": "<red>Отменить действие"
+"confirm.hint": "<dark_gray>У вас 30 секунд, чтобы подтвердить."
+"confirm.expired": "<red>Время подтверждения истекло."
+"confirm.cancelled": "<gray>Действие отменено."
+"confirm.repair.header": "<yellow><sprite:items:item/anvil> <white>Починить <gold><count></gold> предметов?"
+"confirm.heal.header": "<yellow><sprite:items:item/golden_apple> <white>Исцелиться с шансом <gold><chance>%</gold>?"
+"confirm.feed.header": "<yellow><sprite:items:item/cooked_beef> <white>Насытиться с шансом <gold><chance>%</gold>?"
+
+# ============ 9. Шансы ============
+"chance.repair.warn": "<yellow><sprite:items:item/anvil> <white>Шанс починки <gold><chance>%</gold>, шанс поломки <red><break>%</red>."
+"chance.heal.warn": "<yellow><sprite:items:item/golden_apple> <white>Шанс исцеления <gold><chance>%</gold>."
+"chance.feed.warn": "<yellow><sprite:items:item/cooked_beef> <white>Шанс насыщения <gold><chance>%</gold>."
+
+# ============ 10. Погода / Время / Личное ============
+"weather.set": "<green><sprite:items:item/water_bucket> <white>Погода в <world>: <value>"
+"weather.locked": "<yellow><sprite:items:item/water_bucket> <white>Погода зафиксирована: <value>"
+"weather.unlocked": "<green><sprite:items:item/bucket> <white>Погода разблокирована."
+
+"time.set": "<green><sprite:items:item/clock> <white>Время в <world>: <value>"
+"time.added": "<green><sprite:items:item/clock> <white>Добавлено тиков: <value>"
+"time.frozen": "<yellow><sprite:items:item/clock> <white>Время зафиксировано."
+"time.unfrozen": "<green><sprite:items:item/clock> <white>Время разблокировано."
+
+"ptime.set": "<gray>Личное время:</gray> <white><value></white> <dark_gray>(<gray><ticks> тиков</gray>)</dark_gray>"
+"ptime.reset": "<gray>Личное время</gray> <green>сброшено</green><gray>.</gray>"
+
+"pweather.set": "<gray>Личная погода:</gray> <value>"
+"pweather.reset": "<gray>Личная погода</gray> <green>сброшена</green><gray>.</gray>"
+
+# ============ 11. Названия пресетов ============
+"time.name.day": "<yellow>утро</yellow>"
+"time.name.noon": "<gold>полдень</gold>"
+"time.name.night": "<dark_blue>ночь</dark_blue>"
+"time.name.midnight": "<dark_gray>полночь</dark_gray>"
+"time.name.dawn": "<light_purple>рассвет</light_purple>"
+"time.name.dusk": "<red>закат</red>"
+
+"weather.name.sun": "<yellow>☀ ясно</yellow>"
+"weather.name.rain": "<blue>☂ дождь</blue>"
+"weather.name.storm": "<dark_blue>⚡ гроза</dark_blue>"
+
+# ============ 12. Сервер / Позиция / Информация ============
+"gc.header": "<dark_gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</dark_gray>"
+
+"gc.section.server": "<gray>┌ <white><bold>Сервер</bold></white></gray>"
+"gc.section.memory": "<gray>├ <white><bold>Память</bold></white></gray>"
+"gc.section.world":  "<gray>├ <white><bold>Мир</bold></white></gray>"
+
+"gc.tps": "<gray>│ <dark_gray>•</dark_gray> <white>TPS:</white> <value></gray>"
+"gc.tps.good":   "<gray>│ <dark_gray>•</dark_gray> <white>TPS:</white> <green><value></green> <green>✔</green></gray>"
+"gc.tps.medium": "<gray>│ <dark_gray>•</dark_gray> <white>TPS:</white> <yellow><value></yellow> <yellow>⚠</yellow></gray>"
+"gc.tps.bad":    "<gray>│ <dark_gray>•</dark_gray> <white>TPS:</white> <red><value></red> <red>✘</red></gray>"
+
+"gc.memory": "<gray>│ <dark_gray>•</dark_gray> <white>Память:</white> <green><used></green> <dark_gray>/</dark_gray> <gray><max></gray> <dark_gray>(<gray><percent>%</gray>)</dark_gray></gray>"
+"gc.chunks":   "<gray>│ <dark_gray>•</dark_gray> <white>Чанков:</white> <gold><value></gold></gray>"
+"gc.entities": "<gray>│ <dark_gray>•</dark_gray> <white>Сущностей:</white> <gold><value></gold></gray>"
+"gc.uptime":   "<gray>│ <dark_gray>•</dark_gray> <white>Аптайм:</white> <aqua><value></aqua></gray>"
+
+"gc.mb": "МБ"
+"gc.percent": "%"
+
+"getpos.self": "<green><sprite:items:item/compass> <white>Ваши координаты: <gold><x> <y> <z>"
+"getpos.other": "<green><sprite:items:item/compass> <white>Координаты <player>: <gold><x> <y> <z>"
+"depth.self": "<green><sprite:items:item/ladder> <white>Глубина: <gold><value></gold> блоков над бедроком."
+"compass.self": "<green><sprite:items:item/compass> <white>Направление: <gold><value>"
+
+# ============ 13. Утилиты ============
+"top.success": "<green><sprite:items:item/feather> <white>Вы на самом верху (<y>)."
+"top.no.block": "<red><sprite:items:item/barrier> <white>Нет блока над вами."
+
+"jump.success": "<green><sprite:items:item/feather> <white>Прыжок."
+"jump.no.target": "<red><sprite:items:item/barrier> <white>Слишком далеко или нет цели."
+
+"ext.success": "<green><sprite:items:item/water_bucket> <white>Вы потушены."
+"ext.other": "<green><sprite:items:item/water_bucket> <white>Игрок <player> потушен."
+"ext.not.burning": "<yellow><sprite:items:item/water_bucket> <white>Игрок не горит."
+
+"more.success": "<green><sprite:items:item/chest> <white>Предмет пополнен до <value>."
+"more.no.item": "<red><sprite:items:item/barrier> <white>Возьмите предмет в руку."
+"more.already.full": "<yellow><sprite:items:item/chest> <white>Стак уже полный."
+
+"skull.success": "<green><sprite:items:item/player_head> <white>Голова <player> получена."
+
+"tree.success": "<green><sprite:items:item/oak_sapling> <white>Дерево посажено."
+"tree.invalid": "<red><sprite:items:item/barrier> <white>Нельзя посадить дерево здесь."
+
+"suicide.success": "<red><sprite:items:item/iron_sword> <white>Вы покончили с собой."
+"suicide.denied": "<red>Нельзя совершить суицид в режиме: <white><value></white>."
+
+"burn.success": "<red><sprite:items:item/flint_and_steel> <white>Вы подожжены."
+"burn.other": "<red><sprite:items:item/flint_and_steel> <white>Игрок <player> подожжён."
+
+"ice.success": "<green><sprite:items:item/blue_ice> <white>Вы заморожены."
+"ice.other": "<green><sprite:items:item/blue_ice> <white>Игрок <player> заморожен."
+
+# ============ 14. Игроки (whois / seen / near / list / ping) ============
+"whois.header": "<dark_gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</dark_gray>"
+"whois.section.main": "<gray>┌ <white><bold>Основное</bold></white></gray>"
+"whois.section.position": "<gray>├ <white><bold>Позиция</bold></white></gray>"
+"whois.section.status": "<gray>├ <white><bold>Статус</bold></white></gray>"
+"whois.name": "<gray>│ <dark_gray>•</dark_gray> <white>Имя:</white> <yellow><value></yellow></gray>"
+"whois.uuid": "<gray>│ <dark_gray>•</dark_gray> <white>UUID:</white> <dark_gray><value></dark_gray></gray>"
+"whois.first.join": "<gray>│ <dark_gray>•</dark_gray> <white>Первый вход:</white> <white><value></white></gray>"
+"whois.last.seen": "<gray>│ <dark_gray>•</dark_gray> <white>Последний вход:</white> <white><value></white></gray>"
+"whois.world": "<gray>│ <dark_gray>•</dark_gray> <white>Мир:</white> <aqua><value></aqua></gray>"
+"whois.position": "<gray>│ <dark_gray>•</dark_gray> <white>Координаты:</white> <aqua>X: <value_x></aqua> <aqua>Y: <value_y></aqua> <aqua>Z: <value_z></aqua></gray>"
+"whois.health": "<gray>│ <dark_gray>•</dark_gray> <white>Здоровье:</white> <red><value> ❤</red></gray>"
+"whois.food": "<gray>│ <dark_gray>•</dark_gray> <white>Еда:</white> <gold><value> 🍗</gold></gray>"
+"whois.gamemode": "<gray>│ <dark_gray>•</dark_gray> <white>Режим:</white> <light_purple><value></light_purple></gray>"
+"whois.ping": "<gray>│ <dark_gray>•</dark_gray> <white>Пинг:</white> <green><value> ms</green></gray>"
+"whois.ip": "<gray>│ <dark_gray>•</dark_gray> <white>IP:</white> <dark_gray><value></dark_gray></gray>"
+"whois.op": "<gray>│ <dark_gray>•</dark_gray> <white>OP:</white> <value></value></gray>"
+"whois.flying": "<gray>│ <dark_gray>•</dark_gray> <white>Летает:</white> <value></value></gray>"
+"whois.online.now": "<green>сейчас онлайн</green>"
+"whois.unknown": "<dark_gray>неизвестно</dark_gray>"
+"whois.true": "<green>✔ да</green>"
+"whois.false": "<red>✘ нет</red>"
+
+"seen.header": "<dark_gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</dark_gray>"
+"seen.online": "<gray>  </gray><green>●</green> <yellow><player></yellow> <dark_gray>—</dark_gray> <green>сейчас онлайн</green>"
+"seen.recent": "<gray>  </gray><red>○</red> <yellow><player></yellow> <dark_gray>—</dark_gray> <white>не заходил <aqua><value></aqua> назад</white>"
+"seen.last.join": "<dark_gray>              последний вход: <gray><value></gray></dark_gray>"
+"seen.long.ago": "<gray>  </gray><red>○</red> <yellow><player></yellow> <dark_gray>—</dark_gray> <red>очень давно</red>"
+"seen.unknown": "<dark_gray>неизвестно</dark_gray>"
+"seen.just.now": "<green>только что</green>"
+
+"near.header": "<gray>Игроки рядом (<value>):"
+"near.entry": "<gray> • <white><player></white> <gray>(<distance> м)"
+"near.empty": "<yellow>Рядом никого нет."
+
+"list.header": "<gray>Онлайн: <white><value>"
+"list.entry": "<gray> • <white><player>"
+"list.empty": "<yellow>Никого нет онлайн."
+
+"ping.self": "<gray>Ваш пинг: <value> мс"
+"ping.other": "<gray>Пинг <player>: <value> мс"
+
+"ping.self.good": "<green>Ваш пинг: <value> мс"
+"ping.self.medium": "<yellow>Ваш пинг: <value> мс"
+"ping.self.bad": "<red>Ваш пинг: <value> мс"
+
+"ping.other.good": "<green>Пинг <player>: <value> мс"
+"ping.other.medium": "<yellow>Пинг <player>: <value> мс"
+"ping.other.bad": "<red>Пинг <player>: <value> мс"
+
+# ============ 15. Предметы ============
+"itemname.success": "<green><sprite:items:item/name_tag> <white>Имя предмета изменено."
+"itemname.removed": "<green><sprite:items:item/name_tag> <white>Имя предмета удалено."
+"itemlore.added": "<green><sprite:items:item/writable_book> <white>Lore добавлен."
+"itemlore.cleared": "<green><sprite:items:item/writable_book> <white>Lore очищен."
+"itemlore.line": "<gray> • <white><value>"
+"item.invalid.hand": "<red><sprite:items:item/barrier> <white>Возьмите предмет в руку."
+
+# ============ 16. Направления ============
+"direction.north": "Север"
+"direction.south": "Юг"
+"direction.east": "Восток"
+"direction.west": "Запад"
+
+# ============ 17. Форматы времени ============
+"time.format.days": "<value> д. <rest> ч."
+"time.format.hours": "<value> ч. <rest> мин."
+"time.format.minutes": "<value> мин. <rest> сек."
+"time.format.seconds": "<value> сек."
+
+# ============ 18. Кулдаун ============
+"cooldown.active": "<red><sprite:items:item/clock> <white>Подождите <value> сек."

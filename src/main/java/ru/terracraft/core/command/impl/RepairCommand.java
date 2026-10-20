@@ -15,6 +15,21 @@ import ru.terracraft.core.lang.LangKey;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * /repair          — починить предмет в руке
+ * /repair all      — починить всё в инвентаре (с подтверждением, если включено)
+ * /repair confirm  — подтвердить /repair all
+ * /repair cancel   — отменить /repair all
+ *
+ * <p>Права:
+ * <ul>
+ *   <li>{@link #PERM} — /repair</li>
+ *   <li>{@link #PERM_ALL} — /repair all|confirm|cancel</li>
+ * </ul>
+ *
+ * <p>Сообщения об успехе/поломке — в чат (важно видеть, что именно произошло).
+ * Ошибки (нет предмета, провал шанса) — в action bar (короткие).
+ */
 public class RepairCommand {
 
     public static final String PERM     = "terracraft.core.repair";
@@ -34,57 +49,69 @@ public class RepairCommand {
                 .withAliases("fix")
                 .withPermission(PERM)
                 .executesPlayer((player, args) -> {
-                    if (!plugin.cooldowns().check(player, CommandKey.REPAIR)) return;
+                    if (!plugin.cooldowns().tryAcquire(player, CommandKey.REPAIR)) return;
 
                     ItemStack hand = player.getInventory().getItemInMainHand();
                     if (hand.getType() == Material.AIR || !isDamaged(hand)) {
+                        plugin.cooldowns().rollback(player, CommandKey.REPAIR);
                         plugin.msg().send(player, LangKey.REPAIR_NO_ITEM);
                         return;
                     }
 
                     AdminToolsConfig.Repair cfg = plugin.config().get().repair();
-
                     if (cfg.breakChance() > 0 || cfg.repairChance() < 100) {
                         plugin.msg().send(player, LangKey.CHANCE_REPAIR_WARN,
                                 "chance", format(cfg.repairChance()),
                                 "break",  format(cfg.breakChance()));
                     }
 
+                    String itemKey = hand.getType().getKey().getKey();
                     Result result = attempt(hand);
                     switch (result) {
                         case REPAIRED -> {
-                            plugin.msg().actionBar(player, LangKey.REPAIR_SUCCESS, "value", 1);
+                            plugin.cooldowns().commit(player, CommandKey.REPAIR);
+                            // Чат — важно видеть, что предмет починен
+                            plugin.msg().send(player, LangKey.REPAIR_SUCCESS, "value", 1);
                             plugin.msg().sound(player, Sound.BLOCK_ANVIL_USE, 0.7f, 1.2f);
+                            plugin.stats().increment(player, "repair");
                         }
                         case BROKEN -> {
+                            plugin.cooldowns().commit(player, CommandKey.REPAIR);
                             player.getInventory().setItemInMainHand(null);
-                            plugin.msg().actionBar(player, LangKey.REPAIR_BROKEN,
-                                    "item", hand.getType().name().toLowerCase());
+                            // Чат — предмет сломался, важно видеть
+                            plugin.msg().send(player, LangKey.REPAIR_BROKEN, "item", itemKey);
                             plugin.msg().sound(player, Sound.ENTITY_ITEM_BREAK, 0.7f, 1.0f);
+                            plugin.stats().increment(player, "repair");
                         }
                         case FAILED -> {
+                            plugin.cooldowns().rollback(player, CommandKey.REPAIR);
+                            // action bar — провал шанса, короткое
                             plugin.msg().actionBar(player, LangKey.REPAIR_FAILED);
                             plugin.msg().sound(player, Sound.BLOCK_NOTE_BLOCK_BASS, 0.5f, 0.5f);
                         }
                     }
+                    plugin.msg().logAction(player, "/repair",
+                            "item", itemKey,
+                            "result", result.name().toLowerCase());
                 })
                 .register();
 
-        // ==== /repair all — подтверждение или сразу ====
+        // ==== /repair all ====
         new CommandAPICommand("repair")
                 .withPermission(PERM_ALL)
                 .withArguments(new LiteralArgument("all"))
                 .executesPlayer((player, args) -> {
-                    if (!plugin.cooldowns().check(player, CommandKey.REPAIR)) return;
+                    if (!plugin.cooldowns().tryAcquire(player, CommandKey.REPAIR)) return;
 
                     int damaged = countDamaged(player);
                     if (damaged == 0) {
+                        plugin.cooldowns().rollback(player, CommandKey.REPAIR);
                         plugin.msg().send(player, LangKey.REPAIR_NO_ITEM);
                         return;
                     }
 
                     if (plugin.config().get().feedback().confirmations()) {
-                        // Подтверждения включены — показываем кнопки
+                        plugin.cooldowns().rollback(player, CommandKey.REPAIR);
                         plugin.confirms().expect(player, ACTION_ALL);
 
                         plugin.msg().confirm(player,
@@ -92,11 +119,12 @@ public class RepairCommand {
                                 "/repair confirm",
                                 "/repair cancel",
                                 "count", damaged);
-
                         plugin.msg().hint(player, LangKey.CONFIRM_HINT);
                     } else {
-                        // Подтверждения выключены — сразу выполняем
                         repairAll(player);
+                        plugin.cooldowns().commit(player, CommandKey.REPAIR);
+                        plugin.msg().logAction(player, "/repair all", "count", damaged);
+                        plugin.stats().increment(player, "repair_all");
                     }
                 })
                 .register();
@@ -110,7 +138,12 @@ public class RepairCommand {
                         plugin.msg().send(player, LangKey.CONFIRM_EXPIRED);
                         return;
                     }
+                    if (!plugin.cooldowns().tryAcquire(player, CommandKey.REPAIR)) return;
+                    int damaged = countDamaged(player);
                     repairAll(player);
+                    plugin.cooldowns().commit(player, CommandKey.REPAIR);
+                    plugin.msg().logAction(player, "/repair all", "count", damaged);
+                    plugin.stats().increment(player, "repair_all");
                 })
                 .register();
 
