@@ -8,18 +8,18 @@ import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.MultiLiteralArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
-import org.bukkit.Bukkit;
 import org.bukkit.GameRules;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.terracraft.core.TerraCorePlugin;
+import ru.terracraft.core.command.util.Args;
 import ru.terracraft.core.command.util.WorldResolver;
-import ru.terracraft.core.config.AdminToolsConfig;
 import ru.terracraft.core.lang.LangKey;
 
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class TimeCommand {
                 .withPermission(PERM)
                 .withArguments(new MultiLiteralArgument("preset", PRESETS))
                 .withOptionalArguments(new LiteralArgument("instant"))
-                .withOptionalArguments(worldArgument())
+                .withOptionalArguments(Args.worldArg("world"))
                 .executes((sender, args) -> {
                     String preset = (String) args.get("preset");
                     Long ticks = presetToTicks(preset);
@@ -74,7 +74,7 @@ public class TimeCommand {
                 .withArguments(new LiteralArgument("set"))
                 .withArguments(valueArgument())
                 .withOptionalArguments(new LiteralArgument("instant"))
-                .withOptionalArguments(worldArgument())
+                .withOptionalArguments(Args.worldArg("world"))
                 .executes((sender, args) -> {
                     String raw = (String) args.get("value");
                     Long ticks = parseTimeValue(raw);
@@ -94,7 +94,7 @@ public class TimeCommand {
                 .withArguments(valueArgument())
                 .withOptionalArguments(new IntegerArgument("seconds", 1,
                         plugin.config().get().time().maxSmoothSeconds()))
-                .withOptionalArguments(worldArgument())
+                .withOptionalArguments(Args.worldArg("world"))
                 .executes((sender, args) -> {
                     String raw = (String) args.get("value");
                     Long ticks = parseTimeValue(raw);
@@ -113,7 +113,7 @@ public class TimeCommand {
                 .withPermission(PERM)
                 .withArguments(new LiteralArgument("add"))
                 .withArguments(new IntegerArgument("ticks", -MAX_TICKS, MAX_TICKS))
-                .withOptionalArguments(worldArgument())
+                .withOptionalArguments(Args.worldArg("world"))
                 .executes((sender, args) -> {
                     int ticks = (int) args.get("ticks");
                     String worldArg = worldArg(args);
@@ -143,7 +143,7 @@ public class TimeCommand {
                 .withPermission(PERM_FREEZE)
                 .withArguments(new LiteralArgument("freeze"))
                 .withArguments(new MultiLiteralArgument("state", "on", "off"))
-                .withOptionalArguments(worldArgument())
+                .withOptionalArguments(Args.worldArg("world"))
                 .executes((sender, args) -> {
                     String state = (String) args.get("state");
                     String worldArg = worldArg(args);
@@ -171,22 +171,7 @@ public class TimeCommand {
                 .register();
     }
 
-    // ============ Аргументы с Tab-комплитом ============
-
-    private @NotNull Argument<String> worldArgument() {
-        return new StringArgument("world")
-                .replaceSuggestions(ArgumentSuggestions.strings(info -> {
-                    List<String> list = new ArrayList<>();
-                    list.add("all");
-                    String current = info.currentInput().toLowerCase(Locale.ROOT);
-                    for (World w : Bukkit.getWorlds()) {
-                        if (w.getName().toLowerCase(Locale.ROOT).startsWith(current)) {
-                            list.add(w.getName());
-                        }
-                    }
-                    return list.toArray(new String[0]);
-                }));
-    }
+    // ============ Аргумент value (пресеты) ============
 
     private @NotNull Argument<String> valueArgument() {
         return new StringArgument("value")
@@ -272,8 +257,15 @@ public class TimeCommand {
             }
         }
 
+        String worldName = worldArg;
+        if (worldName == null) {
+            Locale locale = (sender instanceof Player p) ? p.locale() : Locale.US;
+            String cw = plugin.lang().raw(locale, LangKey.CURRENT_WORLD);
+            worldName = cw != null ? cw : "current";
+        }
+
         plugin.msg().send(sender, LangKey.TIME_SET,
-                "world", worldArg == null ? "текущий" : worldArg,
+                "world", worldName,
                 "value", ticks);
         plugin.msg().sound(sender, Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 1.5f);
     }

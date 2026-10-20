@@ -323,6 +323,17 @@ public enum LangKey {
     TIME_FORMAT_MINUTES,
     TIME_FORMAT_SECONDS,
 
+    // ============ Mail ============
+    MAIL_SENT,
+    MAIL_RECEIVED,
+    MAIL_INBOX_HEADER,
+    MAIL_INBOX_ENTRY,
+    MAIL_INBOX_EMPTY,
+    MAIL_NOT_FOUND,
+    MAIL_CLEARED,
+    MAIL_SELF,
+    MAIL_TOO_LONG,
+
     // ============ 18. Кулдаун ============
     COOLDOWN_ACTIVE;
 

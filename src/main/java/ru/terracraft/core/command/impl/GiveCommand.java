@@ -3,20 +3,18 @@ package ru.terracraft.core.command.impl;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.ItemStackArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import ru.terracraft.core.TerraCorePlugin;
+import ru.terracraft.core.command.util.Args;
 import ru.terracraft.core.config.AdminToolsConfig;
 import ru.terracraft.core.lang.LangKey;
-
-import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
 
 public class GiveCommand {
 
@@ -34,19 +32,10 @@ public class GiveCommand {
 
         new CommandAPICommand("give")
                 .withPermission(PERM)
-                .withArguments(new StringArgument("target")
-                        .replaceSuggestions((info, builder) -> {
-                            String prefix = info.currentInput().toLowerCase(Locale.ROOT);
-                            for (Player p : Bukkit.getOnlinePlayers()) {
-                                if (p.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
-                                    builder.suggest(p.getName());
-                                }
-                            }
-                            return CompletableFuture.completedFuture(builder.build());
-                        }))
+                .withArguments(Args.playerArg("target"))
                 .withArguments(new ItemStackArgument("item"))
                 .withOptionalArguments(new IntegerArgument("amount", 1, maxAmount))
-                .executes((sender, args) -> {
+                .executes((CommandSender sender, dev.jorel.commandapi.executors.CommandArguments args) -> {
                     String name = (String) args.get("target");
                     Player target = Bukkit.getPlayerExact(name);
                     if (target == null) {

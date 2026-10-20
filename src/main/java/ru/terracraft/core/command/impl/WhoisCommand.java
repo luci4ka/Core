@@ -1,7 +1,6 @@
 package ru.terracraft.core.command.impl;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -11,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.terracraft.core.TerraCorePlugin;
+import ru.terracraft.core.command.util.Args;
 import ru.terracraft.core.lang.LangKey;
 import ru.terracraft.core.storage.PlayerCacheService;
 
@@ -21,17 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
-/**
- * /whois <player>
- *
- * <p>Права:
- * <ul>
- *   <li>{@link #PERM} — онлайн-игрок;</li>
- *   <li>{@link #PERM_OTHERS} — офлайн-игрок (IP, координаты, gamemode).</li>
- * </ul>
- */
 public class WhoisCommand {
 
     public static final String PERM = "terracraft.core.whois";
@@ -47,16 +37,7 @@ public class WhoisCommand {
         new CommandAPICommand("whois")
                 .withAliases("playerinfo", "pinfo")
                 .withPermission(PERM)
-                .withArguments(new StringArgument("name")
-                        .replaceSuggestions((info, builder) -> {
-                            String prefix = info.currentInput().toLowerCase(Locale.ROOT);
-                            for (Player p : Bukkit.getOnlinePlayers()) {
-                                if (p.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
-                                    builder.suggest(p.getName());
-                                }
-                            }
-                            return CompletableFuture.completedFuture(builder.build());
-                        }))
+                .withArguments(Args.playerArg("name"))
                 .executes((sender, args) -> {
                     String name = (String) args.get("name");
                     if (name == null || name.isBlank()) {
@@ -70,7 +51,6 @@ public class WhoisCommand {
                         return;
                     }
 
-                    // Офлайн — только с whois.others
                     if (!sender.hasPermission(PERM_OTHERS)) {
                         plugin.msg().send(sender, LangKey.NO_PERMISSION);
                         return;
@@ -80,8 +60,6 @@ public class WhoisCommand {
                 })
                 .register();
     }
-
-    // ============ Онлайн ============
 
     private void showOnline(@NotNull CommandSender sender, @NotNull Player p) {
         Locale locale = senderLocale(sender);
@@ -111,14 +89,12 @@ public class WhoisCommand {
         plugin.msg().sendRaw(sender, LangKey.WHOIS_GAMEMODE,
                 "value", localizedGamemode(p.getGameMode(), locale));
         plugin.msg().sendRaw(sender, LangKey.WHOIS_PING, "value", p.getPing());
-        plugin.msg().sendRaw(sender, LangKey.WHOIS_IP, "value", resolveIp(p));
+        plugin.msg().sendRaw(sender, LangKey.WHOIS_IP, "value", resolveIp(p, locale));
         plugin.msg().sendRaw(sender, LangKey.WHOIS_OP, "value", boolKey(p.isOp(), locale));
         plugin.msg().sendRaw(sender, LangKey.WHOIS_FLYING, "value", boolKey(p.isFlying(), locale));
 
         plugin.msg().sendRaw(sender, LangKey.WHOIS_HEADER);
     }
-
-    // ============ Офлайн ============
 
     private void showOffline(@NotNull CommandSender sender, @NotNull String name) {
         Locale locale = senderLocale(sender);
@@ -175,8 +151,6 @@ public class WhoisCommand {
         plugin.msg().sendRaw(sender, LangKey.WHOIS_HEADER);
     }
 
-    // ============ Утилиты ============
-
     private @Nullable PlayerCacheService.PlayerData findByCache(@NotNull String name) {
         UUID uuid = plugin.playerCache().findUuidByName(name);
         if (uuid == null) return null;
@@ -219,9 +193,10 @@ public class WhoisCommand {
         }
     }
 
-    private @NotNull String resolveIp(@NotNull Player p) {
+    /** IP-адрес игрока. При отсутствии — локализованное «неизвестно». */
+    private @NotNull String resolveIp(@NotNull Player p, @NotNull Locale locale) {
         InetSocketAddress addr = p.getAddress();
-        if (addr == null || addr.getAddress() == null) return unknown(Locale.US);
+        if (addr == null || addr.getAddress() == null) return unknown(locale);
         return addr.getAddress().getHostAddress();
     }
 

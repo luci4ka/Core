@@ -114,8 +114,22 @@ public class StorageManager {
                 )
                 """.formatted(p), "players");
 
+        executeRaw("""
+                CREATE TABLE IF NOT EXISTS %smail (
+                    id          BIGINT       NOT NULL AUTO_INCREMENT,
+                    recipient   VARCHAR(36)  NOT NULL,
+                    sender      VARCHAR(36)  NOT NULL,
+                    sender_name VARCHAR(16)  NOT NULL,
+                    message     VARCHAR(512) NOT NULL,
+                    sent_at     BIGINT       NOT NULL,
+                    is_read     BOOLEAN      NOT NULL DEFAULT FALSE,
+                    PRIMARY KEY (id)
+                )
+                """.formatted(p), "mail");
+
         createIndex("idx_" + p + "cooldowns_expires", p + "cooldowns", "expires_at");
         createIndex("idx_" + p + "players_name", p + "players", "name");
+        createIndex("idx_" + p + "mail_recipient", p + "mail", "recipient");
     }
 
     private void executeRaw(@NotNull String sql, @NotNull String name) {

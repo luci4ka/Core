@@ -2,7 +2,6 @@ package ru.terracraft.core.command.impl;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.IntegerArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.text.Component;
@@ -16,11 +15,13 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.terracraft.core.TerraCorePlugin;
+import ru.terracraft.core.command.util.Args;
 import ru.terracraft.core.config.AdminToolsConfig;
 import ru.terracraft.core.lang.LangKey;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
 
 public class EnchantCommand {
 
@@ -37,22 +38,16 @@ public class EnchantCommand {
         AdminToolsConfig.Enchant cfg = plugin.config().get().enchant();
         int maxLevel = Math.max(1, Math.min(255, cfg.maxLevel()));
 
+        // Список ключей энчантов — для Tab-комплита
+        List<String> names = new ArrayList<>();
+        for (Enchantment e : enchantmentRegistry()) {
+            names.add(e.getKey().getKey().toLowerCase(Locale.ROOT));
+        }
+
         new CommandAPICommand("enchant")
                 .withAliases("ench")
                 .withPermission(PERM)
-                .withArguments(new StringArgument("enchant")
-                        .replaceSuggestions((info, builder) -> {
-                            String prefix = info.currentInput().toLowerCase(Locale.ROOT);
-                            int count = 0;
-                            for (Enchantment e : enchantmentRegistry()) {
-                                String name = e.getKey().getKey().toLowerCase(Locale.ROOT);
-                                if (name.startsWith(prefix)) {
-                                    builder.suggest(name);
-                                    if (++count >= 50) break;
-                                }
-                            }
-                            return CompletableFuture.completedFuture(builder.build());
-                        }))
+                .withArguments(Args.registryArg("enchant", names))
                 .withOptionalArguments(new IntegerArgument("level", 1, maxLevel))
                 .executesPlayer((player, args) -> {
                     ItemStack hand = player.getInventory().getItemInMainHand();

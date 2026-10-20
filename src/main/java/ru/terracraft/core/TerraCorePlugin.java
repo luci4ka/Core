@@ -15,6 +15,7 @@ import ru.terracraft.core.listener.PlayerJoinListener;
 import ru.terracraft.core.listener.PlayerQuitListener;
 import ru.terracraft.core.listener.VanishListener;
 import ru.terracraft.core.manager.*;
+import ru.terracraft.core.storage.MailService;
 import ru.terracraft.core.storage.PlayerCacheService;
 import ru.terracraft.core.storage.StateStore;
 import ru.terracraft.core.storage.StatsService;
@@ -36,6 +37,7 @@ public class TerraCorePlugin extends JavaPlugin {
     private StateStore stateStore;
     private StatsService statsService;
     private PlayerCacheService playerCacheService;
+    private MailService mailService;
 
     private GodManager godManager;
     private FlyManager flyManager;
@@ -66,6 +68,7 @@ public class TerraCorePlugin extends JavaPlugin {
         this.stateStore = new StateStore(this);
         this.statsService = new StatsService(this);
         this.playerCacheService = new PlayerCacheService(this);
+        this.mailService = new MailService(this);
 
         // 4. Менеджеры
         this.godManager      = new GodManager(stateStore);
@@ -182,6 +185,7 @@ public class TerraCorePlugin extends JavaPlugin {
     public StateStore states()              { return stateStore; }
     public StatsService stats()             { return statsService; }
     public PlayerCacheService playerCache() { return playerCacheService; }
+    public MailService mail()               { return mailService; }
 
     public GodManager gods()           { return godManager; }
     public FlyManager fly()            { return flyManager; }

@@ -12,6 +12,7 @@ import ru.terracraft.core.command.impl.FlyCommand;
 import ru.terracraft.core.command.impl.GamemodeCommand;
 import ru.terracraft.core.command.impl.GodCommand;
 import ru.terracraft.core.command.impl.VanishCommand;
+import ru.terracraft.core.lang.LangKey;
 
 /**
  * Восстанавливает состояния god / fly / gamemode / vanish при входе.
@@ -67,5 +68,11 @@ public class PlayerJoinListener implements Listener {
             plugin.vanish().clear(player.getUniqueId());
         }
         plugin.vanish().applyVisibilityForViewer(player);
+
+        // ==== Mail — уведомить о непрочитанных ====
+        int unread = plugin.mail().unreadCount(player.getUniqueId());
+        if (unread > 0) {
+            plugin.msg().send(player, LangKey.MAIL_RECEIVED, "value", unread);
+        }
     }
 }

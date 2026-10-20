@@ -1,40 +1,24 @@
 package ru.terracraft.core.command.impl;
 
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.Argument;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.MultiLiteralArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
-import org.bukkit.Bukkit;
+import dev.jorel.commandapi.executors.CommandArguments;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.terracraft.core.TerraCorePlugin;
+import ru.terracraft.core.command.util.Args;
 import ru.terracraft.core.command.util.WorldResolver;
 import ru.terracraft.core.config.AdminToolsConfig;
 import ru.terracraft.core.lang.LangKey;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * /weather <sun|rain|storm> [world|all]
- * /weather lock <sun|rain|storm> [world]
- * /weather unlock [world]
- *
- * <p>Права:
- * <ul>
- *   <li>{@link #PERM} — базовое;</li>
- *   <li>{@link #PERM_ALL} — менять погоду во всех мирах ({@code all});</li>
- *   <li>{@link #PERM_LOCK} — lock / unlock.</li>
- * </ul>
- *
- * <p>Длительности после {@code unlock} — в {@code config.yml}, раздел {@code weather}.
- */
 public class WeatherCommand {
 
     public static final String PERM      = "terracraft.core.weather";
@@ -52,7 +36,7 @@ public class WeatherCommand {
         new CommandAPICommand("weather")
                 .withPermission(PERM)
                 .withArguments(new MultiLiteralArgument("type", "sun", "rain", "storm"))
-                .withOptionalArguments(worldArgument())
+                .withOptionalArguments(Args.worldArg("world"))
                 .executes((sender, args) -> {
                     String type = (String) args.get("type");
                     String worldArg = worldArg(args);
@@ -65,7 +49,7 @@ public class WeatherCommand {
                 .withPermission(PERM_LOCK)
                 .withArguments(new LiteralArgument("lock"))
                 .withArguments(new MultiLiteralArgument("type", "sun", "rain", "storm"))
-                .withOptionalArguments(worldArgument())
+                .withOptionalArguments(Args.worldArg("world"))
                 .executes((sender, args) -> {
                     String type = (String) args.get("type");
                     String worldArg = worldArg(args);
@@ -77,7 +61,7 @@ public class WeatherCommand {
         new CommandAPICommand("weather")
                 .withPermission(PERM_LOCK)
                 .withArguments(new LiteralArgument("unlock"))
-                .withOptionalArguments(worldArgument())
+                .withOptionalArguments(Args.worldArg("world"))
                 .executes((sender, args) -> {
                     String worldArg = worldArg(args);
 
@@ -106,26 +90,7 @@ public class WeatherCommand {
                 .register();
     }
 
-    // ============ Аргумент world ============
-
-    private @NotNull Argument<String> worldArgument() {
-        return new StringArgument("world")
-                .replaceSuggestions(ArgumentSuggestions.strings(info -> {
-                    List<String> list = new ArrayList<>();
-                    list.add("all");
-
-                    String current = info.currentInput().toLowerCase(Locale.ROOT);
-                    for (World w : Bukkit.getWorlds()) {
-                        String name = w.getName();
-                        if (name.toLowerCase(Locale.ROOT).startsWith(current)) {
-                            list.add(name);
-                        }
-                    }
-                    return list.toArray(new String[0]);
-                }));
-    }
-
-    private @Nullable String worldArg(@NotNull dev.jorel.commandapi.executors.CommandArguments args) {
+    private @Nullable String worldArg(@NotNull CommandArguments args) {
         String raw = (String) args.get("world");
         return (raw == null || raw.isBlank()) ? null : raw;
     }
@@ -133,8 +98,6 @@ public class WeatherCommand {
     private boolean isAll(@Nullable String worldArg) {
         return worldArg != null && worldArg.equalsIgnoreCase("all");
     }
-
-    // ============ Применение ============
 
     private void apply(@NotNull CommandSender sender,
                        @NotNull String type,
@@ -173,9 +136,16 @@ public class WeatherCommand {
             }
         }
 
+        String worldName = worldArg;
+        if (worldName == null) {
+            Locale locale = (sender instanceof Player p) ? p.locale() : Locale.US;
+            String cw = plugin.lang().raw(locale, LangKey.CURRENT_WORLD);
+            worldName = cw != null ? cw : "current";
+        }
+
         LangKey key = lock ? LangKey.WEATHER_LOCKED : LangKey.WEATHER_SET;
         plugin.msg().send(sender, key,
-                "world", worldArg == null ? "текущий" : worldArg,
+                "world", worldName,
                 "value", type);
         plugin.msg().sound(sender, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.5f, 1.5f);
     }

@@ -2,7 +2,6 @@ package ru.terracraft.core.command.impl;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.MultiLiteralArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
@@ -10,10 +9,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.terracraft.core.TerraCorePlugin;
+import ru.terracraft.core.command.util.Args;
 import ru.terracraft.core.lang.LangKey;
 
 import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
 
 public class PTimeCommand {
 
@@ -42,16 +41,7 @@ public class PTimeCommand {
         new CommandAPICommand("ptime")
                 .withPermission(PERM_OTHERS)
                 .withArguments(new MultiLiteralArgument("preset", PRESETS))
-                .withArguments(new StringArgument("target")
-                        .replaceSuggestions((info, builder) -> {
-                            String prefix = info.currentInput().toLowerCase(Locale.ROOT);
-                            for (Player p : Bukkit.getOnlinePlayers()) {
-                                if (p.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
-                                    builder.suggest(p.getName());
-                                }
-                            }
-                            return CompletableFuture.completedFuture(builder.build());
-                        }))
+                .withArguments(Args.playerArg("target"))
                 .executes((sender, args) -> {
                     String name = (String) args.get("target");
                     Player target = Bukkit.getPlayerExact(name);

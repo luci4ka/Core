@@ -14,6 +14,9 @@ import ru.terracraft.core.lang.LangKey;
  * {@code /gamemode}, {@code /enchant}, {@code /ext}). Это сделано намеренно:
  * CommandAPI регистрирует их с более высоким приоритетом, и ванильные
  * обработчики не вызываются.
+ *
+ * <p><b>Изоляция падений:</b> каждая команда регистрируется через
+ * {@link #safe(String, Runnable)} — если одна упадёт, остальные зарегистрируются.
  */
 public class CommandRegistrar {
 
@@ -34,43 +37,62 @@ public class CommandRegistrar {
         registerMovement();
         registerPlayerActions();
         registerInfo();
+        registerMail();
+    }
+
+    // ============ Изоляция ============
+
+    /**
+     * Регистрирует команду в try/catch — одна упавшая не ломает остальные.
+     *
+     * @param name   имя команды (для лога)
+     * @param action регистратор
+     */
+    private void safe(@NotNull String name, @NotNull Runnable action) {
+        try {
+            action.run();
+        } catch (Throwable e) {
+            plugin.getLogger().severe("Failed to register command '" + name
+                    + "': " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // ============ Группы ============
 
     private void registerCore() {
-        new TerraCoreCommand(plugin).register();
+        safe("terracore", () -> new TerraCoreCommand(plugin).register());
     }
 
     private void registerStates() {
-        new GodCommand(plugin).register();
-        new FlyCommand(plugin).register();
-        new VanishCommand(plugin).register();
+        safe("god",    () -> new GodCommand(plugin).register());
+        safe("fly",    () -> new FlyCommand(plugin).register());
+        safe("vanish", () -> new VanishCommand(plugin).register());
     }
 
     private void registerPlayerStats() {
-        new HealCommand(plugin).register();
-        new FeedCommand(plugin).register();
-        new SpeedCommand(plugin).register();
+        safe("heal",  () -> new HealCommand(plugin).register());
+        safe("feed",  () -> new FeedCommand(plugin).register());
+        safe("speed", () -> new SpeedCommand(plugin).register());
     }
 
     private void registerItems() {
-        new RepairCommand(plugin).register();
-        new EnchantCommand(plugin).register();
-        new GiveCommand(plugin).register();
-        new HatCommand(plugin).register();
-        new MoreCommand(plugin).register();
-        new SkullCommand(plugin).register();
-        new TreeCommand(plugin).register();
-        new ItemNameCommand(plugin).register();
-        new ItemLoreCommand(plugin).register();
-        new ClearCommand(plugin).register();          // ← /clear
+        safe("repair",    () -> new RepairCommand(plugin).register());
+        safe("enchant",   () -> new EnchantCommand(plugin).register());
+        safe("give",      () -> new GiveCommand(plugin).register());
+        safe("hat",       () -> new HatCommand(plugin).register());
+        safe("more",      () -> new MoreCommand(plugin).register());
+        safe("skull",     () -> new SkullCommand(plugin).register());
+        safe("tree",      () -> new TreeCommand(plugin).register());
+        safe("itemname",  () -> new ItemNameCommand(plugin).register());
+        safe("itemlore",  () -> new ItemLoreCommand(plugin).register());
+        safe("clear",     () -> new ClearCommand(plugin).register());
     }
 
     private void registerWorld() {
-        new GamemodeCommand(plugin).register();
-        new SpawnMobCommand(plugin).register();
-        new EnderchestCommand(plugin).register();
+        safe("gamemode",    () -> new GamemodeCommand(plugin).register());
+        safe("spawnmob",    () -> new SpawnMobCommand(plugin).register());
+        safe("enderchest",  () -> new EnderchestCommand(plugin).register());
     }
 
     /**
@@ -80,48 +102,52 @@ public class CommandRegistrar {
      * Миры: {@code worlds.workbenchDisabledWorlds}.
      */
     private void registerWorkstations() {
-        new WorkstationCommand(plugin, "workbench",
-                "wb", MenuType.CRAFTING, LangKey.WORKBENCH_OPENED, LangKey.WORKBENCH_TITLE).register();
-        new WorkstationCommand(plugin, "anvil",
-                null, MenuType.ANVIL, LangKey.ANVIL_OPENED, LangKey.ANVIL_TITLE).register();
-        new WorkstationCommand(plugin, "loom",
-                null, MenuType.LOOM, LangKey.LOOM_OPENED, LangKey.LOOM_TITLE).register();
-        new WorkstationCommand(plugin, "grindstone",
-                null, MenuType.GRINDSTONE, LangKey.GRINDSTONE_OPENED, LangKey.GRINDSTONE_TITLE).register();
-        new WorkstationCommand(plugin, "stonecutter",
-                "stonecut", MenuType.STONECUTTER, LangKey.STONECUTTER_OPENED, LangKey.STONECUTTER_TITLE).register();
-        new WorkstationCommand(plugin, "smithingtable",
-                "smithing", MenuType.SMITHING, LangKey.SMITHINGTABLE_OPENED, LangKey.SMITHINGTABLE_TITLE).register();
+        safe("workbench", () -> new WorkstationCommand(plugin, "workbench",
+                "wb", MenuType.CRAFTING, LangKey.WORKBENCH_OPENED, LangKey.WORKBENCH_TITLE).register());
+        safe("anvil", () -> new WorkstationCommand(plugin, "anvil",
+                null, MenuType.ANVIL, LangKey.ANVIL_OPENED, LangKey.ANVIL_TITLE).register());
+        safe("loom", () -> new WorkstationCommand(plugin, "loom",
+                null, MenuType.LOOM, LangKey.LOOM_OPENED, LangKey.LOOM_TITLE).register());
+        safe("grindstone", () -> new WorkstationCommand(plugin, "grindstone",
+                null, MenuType.GRINDSTONE, LangKey.GRINDSTONE_OPENED, LangKey.GRINDSTONE_TITLE).register());
+        safe("stonecutter", () -> new WorkstationCommand(plugin, "stonecutter",
+                "stonecut", MenuType.STONECUTTER, LangKey.STONECUTTER_OPENED, LangKey.STONECUTTER_TITLE).register());
+        safe("smithingtable", () -> new WorkstationCommand(plugin, "smithingtable",
+                "smithing", MenuType.SMITHING, LangKey.SMITHINGTABLE_OPENED, LangKey.SMITHINGTABLE_TITLE).register());
     }
 
     private void registerWeatherTime() {
-        new WeatherCommand(plugin).register();
-        new TimeCommand(plugin).register();
-        new PTimeCommand(plugin).register();
-        new PWeatherCommand(plugin).register();
+        safe("weather",  () -> new WeatherCommand(plugin).register());
+        safe("time",     () -> new TimeCommand(plugin).register());
+        safe("ptime",    () -> new PTimeCommand(plugin).register());
+        safe("pweather", () -> new PWeatherCommand(plugin).register());
     }
 
     private void registerMovement() {
-        new TopCommand(plugin).register();
-        new JumpCommand(plugin).register();
+        safe("top",  () -> new TopCommand(plugin).register());
+        safe("jump", () -> new JumpCommand(plugin).register());
     }
 
     private void registerPlayerActions() {
-        new ExtCommand(plugin).register();
-        new SuicideCommand(plugin).register();
-        new BurnCommand(plugin).register();
-        new IceCommand(plugin).register();
+        safe("ext",     () -> new ExtCommand(plugin).register());
+        safe("suicide", () -> new SuicideCommand(plugin).register());
+        safe("burn",    () -> new BurnCommand(plugin).register());
+        safe("ice",     () -> new IceCommand(plugin).register());
     }
 
     private void registerInfo() {
-        new GcCommand(plugin).register();
-        new GetPosCommand(plugin).register();
-        new DepthCommand(plugin).register();
-        new CompassCommand(plugin).register();
-        new WhoisCommand(plugin).register();
-        new NearCommand(plugin).register();
-        new SeenCommand(plugin).register();
-        new ListCommand(plugin).register();
-        new PingCommand(plugin).register();
+        safe("gc",      () -> new GcCommand(plugin).register());
+        safe("getpos",  () -> new GetPosCommand(plugin).register());
+        safe("depth",   () -> new DepthCommand(plugin).register());
+        safe("compass", () -> new CompassCommand(plugin).register());
+        safe("whois",   () -> new WhoisCommand(plugin).register());
+        safe("near",    () -> new NearCommand(plugin).register());
+        safe("seen",    () -> new SeenCommand(plugin).register());
+        safe("list",    () -> new ListCommand(plugin).register());
+        safe("ping",    () -> new PingCommand(plugin).register());
+    }
+
+    private void registerMail() {
+        safe("mail", () -> new MailCommand(plugin).register());
     }
 }

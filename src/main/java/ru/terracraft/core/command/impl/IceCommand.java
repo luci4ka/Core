@@ -2,29 +2,15 @@ package ru.terracraft.core.command.impl;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.IntegerArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import ru.terracraft.core.TerraCorePlugin;
+import ru.terracraft.core.command.util.Args;
 import ru.terracraft.core.config.AdminToolsConfig;
 import ru.terracraft.core.lang.LangKey;
 
-import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
-
-/**
- * /ice <player> [seconds] — заморозить игрока.
- *
- * <p>Права:
- * <ul>
- *   <li>{@link #PERM} — себя;</li>
- *   <li>{@link #PERM_OTHERS} — другого.</li>
- * </ul>
- *
- * <p>Длительности — в {@code config.yml}, раздел {@code ice}.
- */
 public class IceCommand {
 
     public static final String PERM = "terracraft.core.ice";
@@ -44,16 +30,7 @@ public class IceCommand {
         new CommandAPICommand("ice")
                 .withAliases("freeze")
                 .withPermission(PERM)
-                .withArguments(new StringArgument("target")
-                        .replaceSuggestions((info, builder) -> {
-                            String prefix = info.currentInput().toLowerCase(Locale.ROOT);
-                            for (Player p : Bukkit.getOnlinePlayers()) {
-                                if (p.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
-                                    builder.suggest(p.getName());
-                                }
-                            }
-                            return CompletableFuture.completedFuture(builder.build());
-                        }))
+                .withArguments(Args.playerArg("target"))
                 .withOptionalArguments(new IntegerArgument("seconds", 1, maxSeconds))
                 .executes((sender, args) -> {
                     String name = (String) args.get("target");

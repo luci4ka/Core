@@ -21,7 +21,6 @@
 "current.world": "текущий"
 "all.worlds": "все миры"
 
-
 # ============ 3. God / Fly / Vanish ============
 "god.enabled.self": "<green><sprite:items:item/netherite_chestplate> <white>Godmode <green>включён</green>."
 "god.enabled.other": "<green><sprite:items:item/netherite_chestplate> <white>Godmode выдан игроку <player>."
@@ -295,3 +294,14 @@
 
 # ============ 18. Кулдаун ============
 "cooldown.active": "<red><sprite:items:item/clock> <white>Подождите <value> сек."
+
+# ============ Mail ============
+"mail.sent": "<green>Письмо отправлено игроку</green> <white><player></white><green>.</green>"
+"mail.received": "<yellow>У вас</yellow> <white><value></white> <yellow>непрочитанных писем. /mail inbox</yellow>"
+"mail.inbox.header": "<dark_gray>────────── <aqua>Почта</aqua> ──────────</dark_gray>"
+"mail.inbox.entry": "<gray>[</gray><white><id></white><gray>]</gray> <yellow><player></yellow> <dark_gray>(<time> назад)</dark_gray><gray>:</gray> <white><message></white>"
+"mail.inbox.empty": "<gray>Писем нет.</gray>"
+"mail.not.found": "<red>Письмо #<value> не найдено.</red>"
+"mail.cleared": "<green>Удалено прочитанных писем:</green> <white><value></white>"
+"mail.self": "<red>Нельзя отправить письмо самому себе.</red>"
+"mail.too.long": "<red>Сообщение слишком длинное (макс. <value> символов).</red>"

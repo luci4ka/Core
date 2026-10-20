@@ -58,6 +58,22 @@ public class MessageService {
         return MM.deserialize(raw, resolver(kv));
     }
 
+    /**
+     * Резолвит {@link LangKey} в {@link Component} по локали сендера.
+     * Для {@link Player} — его локаль, иначе {@link Locale#US}.
+     *
+     * <p>Полезно для мест, где нет {@link Player} (консоль, команды с {@code CommandSender}),
+     * но нужен локализованный {@link Component} — например, hover-текст в {@code VanishCommand}.
+     */
+    public @NotNull Component componentAny(@NotNull CommandSender sender,
+                                           @NotNull LangKey key,
+                                           Object... kv) {
+        Locale locale = localeOf(sender);
+        String raw = lang.raw(locale, key);
+        if (raw == null) raw = "<red>?" + key.path() + "?";
+        return MM.deserialize(raw, resolver(kv));
+    }
+
     public @NotNull Component componentPrefixed(@NotNull Player player, @NotNull LangKey key, Object... kv) {
         return Component.text()
                 .append(lang.component(player, LangKey.PREFIX))
@@ -142,10 +158,15 @@ public class MessageService {
         String rawYesH   = lang.raw(locale, LangKey.CONFIRM_BUTTON_YES_HOVER);
         String rawNoH    = lang.raw(locale, LangKey.CONFIRM_BUTTON_NO_HOVER);
 
-        if (rawHeader == null || rawYes == null || rawNo == null) {
-            plugin.getLogger().warning("confirm(): отсутствуют ключи в .lang для " + titleKey);
-            return;
+        // Fallback: если ключа нет в .lang — игрок всё равно должен увидеть кнопки
+        if (rawHeader == null) {
+            plugin.getLogger().warning("confirm(): нет ключа в .lang для " + titleKey
+                    + " — используется fallback.");
+            rawHeader = "<yellow>Подтвердите действие:</yellow>";
         }
+        if (rawYes == null) rawYes = "<green><bold>[✔ Да]</bold></green>";
+        if (rawNo == null)  rawNo  = "<red><bold>[✘ Нет]</bold></red>";
+        // hover'ы — опциональные, без fallback (пустая строка — валидно)
 
         Component header = MM.deserialize(rawHeader, resolver(kv));
         Component yes = MM.deserialize(rawYes)

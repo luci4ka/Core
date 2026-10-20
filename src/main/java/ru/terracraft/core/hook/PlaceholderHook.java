@@ -119,6 +119,9 @@ public class PlaceholderHook extends PlaceholderExpansion {
         if (key.equals("fly"))      return String.valueOf(plugin.fly().isFlying(online));
         if (key.equals("vanished")) return String.valueOf(plugin.vanish().isVanished(online));
 
+        // ==== Почта ====
+        if (key.equals("mail_unread")) return String.valueOf(plugin.mail().unreadCount(online.getUniqueId()));
+
         // ==== Данные игрока ====
         if (key.equals("ping"))             return String.valueOf(online.getPing());
         if (key.equals("ping_color"))       return pingColor(online.getPing());
