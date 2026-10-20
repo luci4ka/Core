@@ -30,8 +30,17 @@ import java.util.concurrent.ConcurrentHashMap;
  *   <li>В {@code plugins/TerraCore/lang/<code>.yml} (перекрывают встроенные)</li>
  * </ol>
  *
- * <p>Drop-in: любой новый {@code <lang>.yml} в {@code plugins/TerraCore/lang/}
- * автоматически подхватывается. Локаль выбирается по клиенту ({@link Player#locale()}).
+ * <p><b>Drop-in:</b> любой новый {@code <lang>.yml} в {@code plugins/TerraCore/lang/}
+ * автоматически подхватывается. Имя файла → локаль:
+ * <ul>
+ *   <li>{@code ru_ru.yml} → {@code ru_RU}</li>
+ *   <li>{@code de_de.yml} → {@code de_DE}</li>
+ *   <li>{@code en.yml} → {@code en} (без страны)</li>
+ *   <li>{@code pt_br.yml} → {@code pt_BR}</li>
+ * </ul>
+ *
+ * <p>Если в кастомной локали не хватает ключа — берётся из {@code en_us}
+ * (или из {@code ru_ru} для CIS-стран).
  */
 public class LangManager {
 
@@ -74,7 +83,7 @@ public class LangManager {
             if (map != null) builtIn.put(code, map);
         }
 
-        // 3. Создать/дополнить файлы на диске
+        // 3. Создать/дополнить файлы на диске для встроенных
         for (var entry : builtIn.entrySet()) {
             String code = entry.getKey();
             Map<String, String> jarMap = entry.getValue();
@@ -99,17 +108,21 @@ public class LangManager {
             for (File f : files) {
                 String code = f.getName().substring(0, f.getName().length() - FILE_EXT.length());
                 Locale locale = localeOf(code);
-                translations.put(locale, readLangFile(f));
-                plugin.getLogger().info("Loaded locale: " + locale.toLanguageTag()
-                        + " (" + f.getName() + ")");
+                Map<String, String> map = readLangFile(f);
+                translations.put(locale, map);
+
+                boolean builtin = code.equals(BUILT_IN_EN) || code.equals(BUILT_IN_RU);
+                plugin.getLogger().info("Loaded " + (builtin ? "built-in" : "custom")
+                        + " locale: " + locale.toLanguageTag()
+                        + " (" + f.getName() + ", " + map.size() + " keys)");
             }
         }
 
         // 5. Индекс по языкам
         rebuildLanguageIndex();
 
-        // 6. Валидация fallback
-        validateKeys();
+        // 6. Валидация — по КАЖДОЙ локали
+        validateAllKeys();
 
         plugin.getLogger().info("Locales loaded: " + translations.size()
                 + " — " + translations.keySet().stream()
@@ -141,9 +154,6 @@ public class LangManager {
         }
     }
 
-    /**
-     * Парсит плоский YAML: каждая строка — {@code "key": "value"}.
-     */
     private @NotNull Map<String, String> parseFlatYaml(@NotNull InputStream is) {
         Map<String, String> map = new LinkedHashMap<>();
         try (BufferedReader br = new BufferedReader(
@@ -176,7 +186,6 @@ public class LangManager {
         return map;
     }
 
-    /** Индекс первого {@code :} вне кавычек. */
     private int findKeyEnd(@NotNull String s) {
         boolean inSingle = false, inDouble = false;
         for (int i = 0; i < s.length(); i++) {
@@ -188,7 +197,6 @@ public class LangManager {
         return -1;
     }
 
-    /** Убирает обрамляющие кавычки и разэкранирует. */
     private @NotNull String unquote(@NotNull String s) {
         if (s.length() >= 2) {
             char first = s.charAt(0);
@@ -245,22 +253,56 @@ public class LangManager {
         }
     }
 
-    private void validateKeys() {
+    // ============ Валидация (per-locale) ============
+
+    /**
+     * Проверяет каждую загруженную локаль на наличие всех ключей из {@link LangKey}.
+     * Для кастомных локалей — предупреждение с перечнем missing-ключей.
+     * Для встроенных (en_us, ru_ru) — severe, если что-то отсутствует.
+     */
+    private void validateAllKeys() {
         Map<String, String> fallbackMap = translations.get(DEFAULT_FALLBACK);
         if (fallbackMap == null) {
             plugin.getLogger().severe("No fallback locale " + DEFAULT_FALLBACK.toLanguageTag());
             return;
         }
+
+        for (var entry : translations.entrySet()) {
+            Locale locale = entry.getKey();
+            Map<String, String> map = entry.getValue();
+
+            List<String> missing = missingKeys(locale);
+            if (missing.isEmpty()) continue;
+
+            boolean builtin = locale.equals(DEFAULT_FALLBACK) || locale.equals(CIS_FALLBACK);
+            String localeName = locale.toLanguageTag();
+
+            if (builtin) {
+                plugin.getLogger().severe("[" + localeName + "] missing "
+                        + missing.size() + " keys: " + String.join(", ", missing));
+            } else {
+                plugin.getLogger().warning("[" + localeName + "] missing "
+                        + missing.size() + "/" + LangKey.values().length
+                        + " keys (will fallback): " + String.join(", ", missing));
+            }
+        }
+    }
+
+    /**
+     * Ключи, которых нет в указанной локали.
+     * Используется в {@code /tc lang} и в {@link #validateAllKeys()}.
+     */
+    public @NotNull List<String> missingKeys(@NotNull Locale locale) {
+        Map<String, String> map = translations.get(locale);
+        if (map == null) return List.of();
+
         List<String> missing = new ArrayList<>();
         for (LangKey key : LangKey.values()) {
-            if (!fallbackMap.containsKey(key.path())) {
+            if (!map.containsKey(key.path())) {
                 missing.add(key.path());
             }
         }
-        if (!missing.isEmpty()) {
-            plugin.getLogger().warning("Missing keys in " + DEFAULT_FALLBACK.toLanguageTag()
-                    + ": " + String.join(", ", missing));
-        }
+        return missing;
     }
 
     // ============ Получение ============
@@ -322,6 +364,39 @@ public class LangManager {
         return DEFAULT_FALLBACK;
     }
 
+    // ============ Статистика (для /tc lang) ============
+
+    /** Информация о загруженной локали. */
+    public record LocaleStats(
+            @NotNull Locale locale,
+            int totalKeys,
+            int missingKeys,
+            boolean builtin
+    ) {
+        public int percentComplete() {
+            if (totalKeys == 0) return 100;
+            return (int) Math.round((totalKeys - missingKeys) * 100.0 / totalKeys);
+        }
+    }
+
+    /**
+     * Возвращает статистику по всем локалям — для {@code /tc lang}.
+     */
+    public @NotNull List<LocaleStats> stats() {
+        int total = LangKey.values().length;
+        List<LocaleStats> list = new ArrayList<>();
+
+        for (var entry : translations.entrySet()) {
+            Locale locale = entry.getKey();
+            int missing = missingKeys(locale).size();
+            boolean builtin = locale.equals(DEFAULT_FALLBACK) || locale.equals(CIS_FALLBACK);
+            list.add(new LocaleStats(locale, total, missing, builtin));
+        }
+
+        list.sort(Comparator.comparing(s -> s.locale().toLanguageTag()));
+        return list;
+    }
+
     // ============ Служебное ============
 
     private @Nullable String lookup(@NotNull Locale locale, @NotNull String path) {
@@ -342,10 +417,6 @@ public class LangManager {
                 : Locale.forLanguageTag(code.replace('_', '-'));
     }
 
-    /**
-     * Резолвер плейсхолдеров. Поддерживает как строки, так и {@link Component}
-     * (для {@code Component.translatable(...)} — имена предметов/сущностей).
-     */
     private @NotNull TagResolver resolver(Object... kv) {
         if (kv.length == 0) return TagResolver.empty();
         if (kv.length % 2 != 0) {
