@@ -20,11 +20,9 @@ repositories {
 dependencies {
     // Paper API
     compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
-    testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
 
     // Compile-only
     compileOnly 'dev.jorel:commandapi-paper-core:12.1.0'
-    testImplementation 'dev.jorel:commandapi-paper-core:12.1.0'
     compileOnly 'me.clip:placeholderapi:2.12.3'
     compileOnly "cc.carm.plugin:minesql-api:1.4.2"
     compileOnly 'cc.carm.lib:easysql-api:0.4.7'
@@ -33,13 +31,13 @@ dependencies {
     implementation 'com.github.ez-plugins:mc-plugin-update-notifier:1.0.0'
     implementation 'org.bstats:bstats-bukkit:3.2.1'
 
-    // H2 оставляем только для тестов (memory-режим)
-    testImplementation 'com.h2database:h2:2.3.232'
-
     // Test
     testImplementation 'org.junit.jupiter:junit-jupiter:6.0.3'
     testImplementation 'org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.116.3'
     testImplementation 'org.assertj:assertj-core:3.27.7'
+    testImplementation 'com.h2database:h2:2.3.232'
+    testImplementation 'dev.jorel:commandapi-paper-core:12.1.0'
+    testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
