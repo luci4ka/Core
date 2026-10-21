@@ -1,13 +1,13 @@
-
-# TerraCore
+# Core
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
 [![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/projects/jdk/21/)
 [![Paper](https://img.shields.io/badge/Paper-1.21.11-blue.svg)](https://papermc.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![JitPack](https://img.shields.io/badge/JitPack-ready-brightgreen.svg)](https://jitpack.io/#luci4ka/TerraCraftCore)
 
 > **TerraCore** — ядро админ-инструментов для Paper-сервера.
-> ~40 команд, локализация (RU/EN), гибкий конфиг, персистентность в MariaDB через MineSQL.
+> ~40 команд, публичный API, AFK-детект, локализация (RU/EN), гибкий конфиг, персистентность в MariaDB через MineSQL.
 
 ---
 
@@ -20,9 +20,11 @@
 - [Хранилище](#-хранилище)
 - [Локализация](#-локализация)
 - [PlaceholderAPI](#-placeholderapi)
+- [Публичный API](#-публичный-api)
 - [Команды](#-команды)
 - [Права](#-права)
 - [Сборка из исходников](#-сборка-из-исходников)
+- [Использование в других плагинах](#-использование-в-других-плагинах)
 - [Тесты](#-тесты)
 - [Архитектура](#-архитектура)
 - [Лицензия](#-лицензия)
@@ -35,6 +37,7 @@
 - **`/god`** — режим бессмертия (урон не проходит).
 - **`/fly`** — полёт (с ограничением по мирам).
 - **`/vanish`** — невидимость с `hidePlayer` и metadata для TAB.
+- **`/afk`** — AFK-статус (себе или другому с правом `.others`).
 - **`/gamemode`** — смена режима + `/gm back`.
 - **`/heal`**, **`/feed`** — лечение/кормление с шансом.
 - **`/speed`** — скорость ходьбы/полёта.
@@ -63,34 +66,36 @@
 - **`/gc`** — TPS, память, чанки, сущности, аптайм.
 - **`/whois`**, **`/seen`**, **`/near`**, **`/list`**, **`/ping`** (с цветовыми порогами).
 - **`/getpos`**, **`/depth`**.
-- **`/terracore reload`**, **`/terracore info`**.
+- **`/terracore reload`**, **`/terracore info`**, **`/terracore lang`**.
 
 ### Архитектура
 - **Persistent state** — кулдауны, god/fly/vanish/gamemode переживают рестарт.
+- **AFK-детект** — автоматически по таймауту + вручную `/afk`.
 - **Статистика** — счётчик использований каждой команды.
 - **Офлайн-кэш** — `/seen` и `/whois` работают для офлайн-игроков.
 - **MariaDB через MineSQL** — единая схема, миграция без изменений.
-- **Локализация** — RU/EN, каскад локалей, дописывание новых ключей.
+- **Локализация** — RU/EN, каскад локалей, дописывание новых ключей, `/tc lang` для проверки.
 - **PlaceholderAPI** — 30+ плейсхолдеров.
-- **Полная настройка через `config.yml`** — 21 раздел.
+- **Публичный API** — `TerraCoreAPI` + `TerraCoreAdminAPI` через `ServicesManager`, события `Terra*ChangeEvent`.
+- **Полная настройка через `config.yml`** — 22 раздела.
 
 ---
 
 ## 📋 Требования
 
-| Компонент | Версия                                                                        |
-|-----------|-------------------------------------------------------------------------------|
-| **Java** | 25+                                                                           |
+| Компонент | Версия |
+|-----------|--------|
+| **Java** | 25+ |
 | **Paper** | 1.21.11+ (используется `RegistryAccess`, `GameRules`, `MenuType.create(...)`) |
-| **CommandAPI** | 12.1.0+ (обязательно)                                                         |
-| **MineSQL** | 1.4.2+ (обязательно)                                                          |
-| **PlaceholderAPI** | 2.12.3+ (опционально)                                                         |
+| **CommandAPI** | 12.1.0+ (обязательно) |
+| **MineSQL** | 1.4.2+ (обязательно) |
+| **PlaceholderAPI** | 2.12.3+ (опционально) |
 
 ---
 
 ## 🚀 Установка
 
-1. Скачайте `Core-x.y.z.jar`.
+1. Скачайте `Core-x.y.z.jar` из [Releases](https://github.com/luci4ka/TerraCraftCore/releases).
 2. Положите в `plugins/`.
 3. Установите [CommandAPI](https://www.spigotmc.org/resources/commandapi.79504/) версии **12.1.0+**.
 4. Установите [MineSQL](https://github.com/CarmJos/MineSQL) и настройте источник `terracore` в `plugins/MineSQL/config.yml`:
@@ -120,7 +125,7 @@
 
 ## ⚙️ Конфигурация
 
-Конфиг полностью переработан: **21 раздел**, каждое значение настраивается.
+Конфиг полностью переработан: **22 раздела**, каждое значение настраивается.
 
 ### `config.yml` — пример
 
@@ -175,6 +180,10 @@ vanish:
   hide-from-tab: true          # Скрывать через hidePlayer
   can-hit-players: false
   reapply-period-ticks: 100    # 20 = 1 сек, 0 = отключено
+
+afk:
+  timeout-seconds: 300         # Таймаут AFK (0 = отключено)
+  kick-after-seconds: 0        # Кикать AFK через N сек (0 = не кикать)
 
 compass:
   duration-seconds: 30         # 0 = бесконечно
@@ -240,8 +249,9 @@ storage:
 | Gamemode current | `tc_states`, key=`gamemode` | ✅ |
 | Статистика | `tc_stats` | ✅ |
 | Офлайн-кэш | `tc_players` | ✅ |
+| Почта | `tc_mail` | ✅ |
 
-### Схема БД (v1)
+### Схема БД (v2)
 
 ```sql
 -- Кулдауны
@@ -283,6 +293,18 @@ CREATE TABLE tc_players (
     last_z        DOUBLE      NULL,
     last_gamemode VARCHAR(16) NULL
 );
+
+-- Почта
+CREATE TABLE tc_mail (
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    recipient   VARCHAR(36)  NOT NULL,
+    sender      VARCHAR(36)  NOT NULL,
+    sender_name VARCHAR(16)  NOT NULL,
+    message     VARCHAR(512) NOT NULL,
+    sent_at     BIGINT       NOT NULL,
+    is_read     BOOLEAN      NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (id)
+);
 ```
 
 Таблицы создаются автоматически при старте (`StorageManager.migrate()`).
@@ -312,6 +334,10 @@ plugins/TerraCore/lang/
 
 При обновлении плагина новые ключи **дописываются** в конец `.yml` файлов на диске. **Существующие переводы не трогаются.**
 
+### Проверка перевода
+
+`/tc lang` — список загруженных локалей, % заполнения, missing-ключи.
+
 ### MiniMessage
 
 Все сообщения поддерживают [MiniMessage](https://docs.advntr.dev/minimessage/format.html):
@@ -330,10 +356,12 @@ plugins/TerraCore/lang/
 | `%terracore_god%` | `true`/`false` |
 | `%terracore_fly%` | `true`/`false` |
 | `%terracore_vanished%` | `true`/`false` |
+| `%terracore_afk%` | `true`/`false` |
 | `%terracore_vanished_count%` | сколько vanished онлайн |
 | `%terracore_vanished_list%` | имена vanished через запятую |
 | `%terracore_god_count%` | сколько в god |
 | `%terracore_fly_count%` | сколько в fly |
+| `%terracore_afk_count%` | сколько AFK |
 | `%terracore_ping%` | пинг (мс) |
 | `%terracore_ping_color%` | `green` / `yellow` / `red` |
 | `%terracore_ping_colored%` | `<green>42</green>` (MiniMessage) |
@@ -362,6 +390,7 @@ plugins/TerraCore/lang/
 | `%terracore_compass_sector%` | `0..3` (0=N, 1=E, 2=S, 3=W) |
 | `%terracore_cooldown_<cmd>%` | секунд до конца кулдауна |
 | `%terracore_cooldown_<cmd>_raw%` | без `+1` |
+| `%terracore_mail_unread%` | непрочитанных писем |
 | `%terracore_enchant_max%` | `enchant.max-level` |
 | `%terracore_give_max%` | `give.max-amount` |
 | `%terracore_spawnmob_max%` | `spawn-mob.max-count` |
@@ -369,6 +398,66 @@ plugins/TerraCore/lang/
 | `%terracore_compass_duration%` | `compass.duration-seconds` |
 
 **Пример:** `%terracore_cooldown_heal%` → `0`, если кулдауна нет.
+
+---
+
+## 🔌 Публичный API
+
+TerraCore предоставляет два интерфейса через `ServicesManager`.
+
+### `TerraCoreAPI` — безопасные данные
+
+```java
+TerraCoreAPI api = Bukkit.getServicesManager().load(TerraCoreAPI.class);
+
+// Состояния (работают и для офлайн)
+boolean god = api.isGod(uuid);
+boolean fly = api.isFlying(uuid);
+boolean vanished = api.isVanished(uuid);
+boolean afk = api.isAfk(uuid);
+String gamemode = api.gamemode(uuid);
+
+// Bukkit-данные (только онлайн)
+int ping = api.ping(uuid);
+double hp = api.health(uuid);
+int food = api.food(uuid);
+int level = api.level(uuid);
+
+// Проверка видимости
+boolean canSee = api.canSee(viewer, targetUuid);
+```
+
+### `TerraCoreAdminAPI` — чувствительные данные (права)
+
+Требует право `terracraft.core.api.sensitive`. Без права — возвращает `null`/`0`.
+
+```java
+TerraCoreAdminAPI admin = Bukkit.getServicesManager().load(TerraCoreAdminAPI.class);
+
+String ip = admin.ip(sender, uuid);
+var pos = admin.position(sender, uuid);
+long firstJoin = admin.firstJoin(sender, uuid);
+long lastSeen = admin.lastSeen(sender, uuid);
+PlayerSnapshot snapshot = admin.cache(sender, uuid);
+```
+
+### События
+
+```java
+@EventHandler
+public void onGod(TerraGodChangeEvent e) {
+    if (e.getNewState()) { ... }
+}
+
+@EventHandler
+public void onFly(TerraFlyChangeEvent e) { ... }
+
+@EventHandler
+public void onVanish(TerraVanishChangeEvent e) { ... }
+
+@EventHandler
+public void onAfk(TerraAfkChangeEvent e) { ... }
+```
 
 ---
 
@@ -380,6 +469,7 @@ plugins/TerraCore/lang/
 |---------|-------|----------|
 | `/terracore reload` | `terracraft.core.reload` | Перечитать конфиг + языки |
 | `/terracore info` | `terracraft.core.info` | Версия, сервер, авторы |
+| `/terracore lang` | `terracraft.core.lang` | Список локалей + % заполнения |
 
 ### Состояния
 
@@ -389,6 +479,7 @@ plugins/TerraCore/lang/
 | `/fly [player]` | `terracraft.core.fly[.others]` | Полёт |
 | `/vanish [player]` | `terracraft.core.vanish[.others]` | Невидимость |
 | `/vanish list` | `terracraft.core.vanish.see` | Список vanished |
+| `/afk [player]` | `terracraft.core.afk[.others]` | AFK-статус |
 | `/gamemode <mode> [player]` | `terracraft.core.gamemode[.others]` | Смена режима (`s/c/a/sp/back`) |
 
 ### Здоровье / еда / скорость
@@ -473,15 +564,18 @@ plugins/TerraCore/lang/
 - `terracraft.core.use` — доступ к `/tc`.
 - `terracraft.core.reload` — `/tc reload`.
 - `terracraft.core.info` — `/tc info`.
+- `terracraft.core.lang` — `/tc lang`.
 
 Для команд с `.others`:
 - `terracraft.core.god` — себе, `terracraft.core.god.others` — другим.
-- Аналогично `fly`, `vanish`, `heal`, `feed`, `speed`, `gamemode`, `enderchest`, `ptime`, `pweather`, `ext`, `ping`, `getpos`, `hat`, `skull`, `clear`, `whois`, `seen`, `burn`, `ice`.
+- Аналогично `fly`, `vanish`, `afk`, `heal`, `feed`, `speed`, `gamemode`, `enderchest`, `ptime`, `pweather`, `ext`, `ping`, `getpos`, `hat`, `skull`, `clear`, `whois`, `seen`, `burn`, `ice`.
 - `terracraft.core.repair` + `terracraft.core.repair.all`.
 - `terracraft.core.weather` + `.weather.all` + `.weather.lock`.
 - `terracraft.core.time` + `.time.all` + `.time.freeze` + `.time.smooth`.
 - `terracraft.core.enchant` + `.enchant.unsafe` — обход ванильных ограничений (книги, зачарование топора).
 - `terracraft.core.vanish.see` — видеть vanished-игроков.
+- `terracraft.core.afk.bypass` — не помечать AFK автоматически.
+- `terracraft.core.api.sensitive` — доступ к `TerraCoreAdminAPI`.
 
 ---
 
@@ -506,7 +600,7 @@ cd TerraCraftCore
 ./gradlew clean test build
 
 # JAR появится в:
-# build/libs/TerraCore-1.0.0.jar
+# build/libs/Core-1.0.2.jar
 ```
 
 ### Windows
@@ -517,17 +611,53 @@ cd TerraCraftCore
 
 ### Что внутри JAR
 
-- Ваш код (`ru.terracraft.core.*`).
+- Ваш код (`ru.terracraft.core.*`, `ru.terracraft.api.*`).
 - Релоцированные зависимости:
-  - `ru.terracraft.core.libs.bstats`
-  - `ru.terracraft.core.libs.configlib`
-  - `ru.terracraft.core.libs.updater`
+    - `ru.terracraft.core.libs.bstats`
+    - `ru.terracraft.core.libs.configlib`
+    - `ru.terracraft.core.libs.updater`
 - **Нет** `paper-api` (compileOnly) — берётся с сервера.
 - **Нет** `commandapi` (compileOnly) — плагин на сервере.
 - **Нет** `placeholderapi` (compileOnly) — плагин на сервере.
 - **Нет** `minesql` (compileOnly) — плагин на сервере.
 
 **Размер:** ~1 МБ.
+
+---
+
+## 📦 Использование в других плагинах
+
+### 1. Подключение через JitPack
+
+В `build.gradle` другого плагина:
+
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compileOnly 'com.github.luci4ka:TerraCraftCore:1.0.2'
+}
+```
+
+### 2. Обязательная зависимость в `paper-plugin.yml`
+
+```yaml
+dependencies:
+  server:
+    Core:
+      load: BEFORE
+      required: true
+      join-classpath: true   # ← критично для доступа к классам Core
+```
+
+### 3. Использование API
+
+```java
+TerraCoreAPI api = Bukkit.getServicesManager().load(TerraCoreAPI.class);
+if (api != null && api.isAfk(player)) { ... }
+```
 
 ---
 
@@ -538,7 +668,7 @@ cd TerraCraftCore
 ./gradlew test
 
 # Только конкретный класс
-./gradlew test --tests "ru.terracraft.core.autotest.ConfirmManagerTest"
+./gradlew test --tests "ru.terracraft.core.autotest.LangManagerTest"
 
 # С подробным выводом
 ./gradlew test --console=plain
@@ -556,42 +686,26 @@ cd TerraCraftCore
 ## 🏗 Архитектура
 
 ```
-ru.terracraft.core
-├── TerraCorePlugin          — главный класс, инициализация
-├── command/
-│   ├── CommandRegistrar     — регистрация всех команд
-│   ├── impl/                — ~40 команд
-│   └── util/WorldResolver   — резолвер мира (null/all/name)
-├── config/
-│   ├── AdminToolsConfig     — record-конфиг (configlib), 21 раздел
-│   ├── ConfigManager        — загрузка/сохранение
-│   └── CommandKey           — enum для кулдаунов
-├── lang/
-│   ├── LangKey              — enum всех ключей (~200)
-│   ├── LangManager          — каскад локалей, дописывание ключей
-│   └── MessageService       — отправка (MiniMessage, actionBar, sound)
-├── listener/
-│   ├── GodListener          — отмена урона god
-│   ├── VanishListener       — запрет урона vanished
-│   ├── PlayerJoinListener   — restore состояний
-│   └── PlayerQuitListener   — сохранение состояний
-├── manager/
-│   ├── GodManager / FlyManager / VanishManager / GamemodeManager
-│   ├── CooldownManager      — двухфазный API (tryAcquire/commit/rollback)
-│   ├── ConfirmManager       — подтверждения с TTL + cleanup task
-│   └── ...
-├── storage/
-│   ├── StorageManager       — MineSQL → MariaDB, миграция
-│   ├── StateStore           — states (god/fly/vanish/gamemode)
-│   ├── StatsService         — статистика команд
-│   └── PlayerCacheService   — офлайн-кэш (seen/whois)
-├── hook/
-│   ├── PlaceholderHook      — PAPI expansion (30+ плейсхолдеров)
-│   └── UpdateNotifierHook   — GitHub Releases
-├── task/
-│   └── VanishTask           — переприменение видимости (период из конфига)
-└── util/
-    └── StartupBanner        — ASCII-панель запуска/выключения
+ru.terracraft
+├── api/                       — Публичный API
+│   ├── TerraCoreAPI           — безопасные данные
+│   ├── TerraCoreAdminAPI      — чувствительные данные (права)
+│   ├── dto/PlayerSnapshot     — DTO для офлайн-кэша
+│   └── event/                 — события (God/Fly/Vanish/AFK)
+├── core/
+│   ├── TerraCorePlugin        — главный класс
+│   ├── command/
+│   │   ├── CommandRegistrar   — регистрация (safe)
+│   │   ├── impl/              — ~40 команд
+│   │   └── util/Args          — хелпер аргументов
+│   ├── config/                — AdminToolsConfig, ConfigManager
+│   ├── lang/                  — LangKey, LangManager, MessageService
+│   ├── listener/              — God, Vanish, Join, Quit, Afk
+│   ├── manager/               — God, Fly, Vanish, Gamemode, AFK, Cooldown, Confirm
+│   ├── storage/               — StorageManager, StateStore, Stats, PlayerCache, Mail
+│   ├── hook/                  — PlaceholderAPI, UpdateNotifier
+│   ├── task/                  — VanishTask, AfkTask
+│   └── util/                  — StartupBanner
 ```
 
 ### Thread-safety

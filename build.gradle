@@ -18,10 +18,7 @@ repositories {
 }
 
 dependencies {
-    // Paper API
     compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
-
-    // Compile-only
     compileOnly 'dev.jorel:commandapi-paper-core:12.1.0'
     compileOnly 'me.clip:placeholderapi:2.12.3'
     compileOnly "cc.carm.plugin:minesql-api:1.4.2"
@@ -31,7 +28,6 @@ dependencies {
     implementation 'com.github.ez-plugins:mc-plugin-update-notifier:1.0.0'
     implementation 'org.bstats:bstats-bukkit:3.2.1'
 
-    // Test
     testImplementation 'org.junit.jupiter:junit-jupiter:6.0.3'
     testImplementation 'org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.116.3'
     testImplementation 'org.assertj:assertj-core:3.27.7'
@@ -40,7 +36,6 @@ dependencies {
     testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
-
 
 tasks.named('test') {
     useJUnitPlatform()
@@ -72,11 +67,11 @@ processResources {
 
 shadowJar {
     archiveClassifier.set('')
+    from sourceSets.main.output   // ← на всякий случай (Gradle 9.x)
 
     relocate 'org.bstats',           'ru.terracraft.core.libs.bstats'
     relocate 'de.exlll.configlib',   'ru.terracraft.core.libs.configlib'
     relocate 'com.github.ezplugins', 'ru.terracraft.core.libs.updater'
-
 
     exclude 'META-INF/maven/**'
     exclude 'META-INF/LICENSE*'
@@ -86,8 +81,21 @@ shadowJar {
     mergeServiceFiles()
 }
 
+// ✅ НЕ отключаем jar — даём ему classifier
 tasks.named('jar') {
-    enabled = false
+    archiveClassifier.set('thin')
 }
 
 build.dependsOn shadowJar
+
+// ✅ Публикуем тонкий JAR (только API + ваши классы)
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact tasks.named('jar')
+            groupId = 'ru.terracraft'
+            artifactId = 'core'
+            version = project.version
+        }
+    }
+}
