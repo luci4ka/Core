@@ -11,9 +11,14 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
       - name: Set up JDK 25
         uses: actions/setup-java@v4
@@ -26,13 +31,20 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew clean shadowJar -x test
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.VERSION }}
+
+      - name: List build artifacts
+        run: ls -la build/libs/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: build/libs/Core-*.jar
+          files: |
+            build/libs/TerraCore-*.jar
           generate_release_notes: true
           draft: false
           prerelease: false
+          name: TerraCore ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
