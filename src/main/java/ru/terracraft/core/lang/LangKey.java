@@ -43,6 +43,10 @@ public enum LangKey {
     INFO_VERSION,
     INFO_SERVER,
     INFO_AUTHORS,
+    AFK_ENABLED,
+    AFK_DISABLED,
+    AFK_OTHER_ENABLED,
+    AFK_OTHER_DISABLED,
 
     // ============ 2. Мир (current / all) ============
     /** «текущий» — мир по умолчанию для /time, /weather. */

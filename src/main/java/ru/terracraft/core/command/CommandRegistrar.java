@@ -68,6 +68,7 @@ public class CommandRegistrar {
         safe("god",    () -> new GodCommand(plugin).register());
         safe("fly",    () -> new FlyCommand(plugin).register());
         safe("vanish", () -> new VanishCommand(plugin).register());
+        safe("afk",    () -> new AfkCommand(plugin).register());   // ← NEW
     }
 
     private void registerPlayerStats() {

@@ -26,6 +26,10 @@
 "info.version": "<gray>Version:</gray> <white><value></white>"
 "info.server": "<gray>Server:</gray> <white><value></white>"
 "info.authors": "<gray>Authors:</gray> <white><value></white>"
+"afk.enabled": "<yellow>💤</yellow> <white>You are now AFK."
+"afk.disabled": "<green>✔</green> <white>You are back."
+"afk.other.enabled": "<yellow>💤</yellow> <white>Player <aqua><player></aqua> is now AFK."
+"afk.other.disabled": "<green>✔</green> <white>Player <aqua><player></aqua> is back."
 
 # ============ 2. World (current / all) ============
 "current.world": "current"

@@ -1,8 +1,10 @@
 package ru.terracraft.core.manager;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import ru.terracraft.api.event.TerraFlyChangeEvent;
 import ru.terracraft.core.storage.StateStore;
 
 import java.util.Collections;
@@ -21,8 +23,17 @@ public class FlyManager {
         this.store = store;
     }
 
+    // ============ API ============
+
+    /** @deprecated используйте {@link #isFlying(UUID)} — работает и для офлайн. */
+    @Deprecated
     public boolean isFlying(@NotNull Player player) {
-        return flying.contains(player.getUniqueId());
+        return isFlying(player.getUniqueId());
+    }
+
+    /** Работает и для офлайн-игроков (читает in-memory set). */
+    public boolean isFlying(@NotNull UUID uuid) {
+        return flying.contains(uuid);
     }
 
     public boolean enable(@NotNull Player player) {
@@ -31,6 +42,7 @@ public class FlyManager {
         player.setAllowFlight(true);
         player.setFlying(true);
         store.set(id, KEY, true);
+        Bukkit.getPluginManager().callEvent(new TerraFlyChangeEvent(player, true));
         return true;
     }
 
@@ -43,21 +55,16 @@ public class FlyManager {
             player.setAllowFlight(false);
         }
         store.clear(id, KEY);
+        Bukkit.getPluginManager().callEvent(new TerraFlyChangeEvent(player, false));
         return true;
     }
 
-    /**
-     * Убрать из памяти, НЕ трогая БД.
-     *
-     * <p>Используется в quit-сценарии: fly сохраняется в БД,
-     * при следующем входе {@link #restore(Player)} вернёт его.
-     */
     public void clearMemoryOnly(@NotNull UUID uuid) {
         flying.remove(uuid);
     }
 
     public boolean toggle(@NotNull Player player) {
-        return isFlying(player) ? !disable(player) : enable(player);
+        return isFlying(player.getUniqueId()) ? !disable(player) : enable(player);
     }
 
     public void clear(@NotNull UUID uuid) {
@@ -65,7 +72,6 @@ public class FlyManager {
         store.clear(uuid, KEY);
     }
 
-    /** Восстанавливает состояние из БД при входе. */
     public void restore(@NotNull Player player) {
         if (store.get(player.getUniqueId(), KEY)) {
             flying.add(player.getUniqueId());

@@ -1,7 +1,9 @@
 package ru.terracraft.core.manager;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import ru.terracraft.api.event.TerraGodChangeEvent;
 import ru.terracraft.core.storage.StateStore;
 
 import java.util.Collections;
@@ -32,6 +34,7 @@ public class GodManager {
         UUID id = player.getUniqueId();
         if (!gods.add(id)) return false;
         store.set(id, KEY, true);
+        Bukkit.getPluginManager().callEvent(new TerraGodChangeEvent(player, true));
         return true;
     }
 
@@ -39,6 +42,7 @@ public class GodManager {
         UUID id = player.getUniqueId();
         if (!gods.remove(id)) return false;
         store.clear(id, KEY);
+        Bukkit.getPluginManager().callEvent(new TerraGodChangeEvent(player, false));
         return true;
     }
 
@@ -51,12 +55,6 @@ public class GodManager {
         store.clear(uuid, KEY);
     }
 
-    /**
-     * Убрать из памяти, НЕ трогая БД.
-     *
-     * <p>Используется в quit-сценарии: god сохраняется в БД,
-     * при следующем входе {@link #restore(Player)} вернёт его.
-     */
     public void clearMemoryOnly(@NotNull UUID uuid) {
         gods.remove(uuid);
     }

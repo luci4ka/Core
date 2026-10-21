@@ -17,6 +17,9 @@ import ru.terracraft.core.lang.LangKey;
 /**
  * Восстанавливает состояния god / fly / gamemode / vanish при входе.
  *
+ * <p>AFK не сохраняется в БД (сессионное), но сбрасываем {@code lastActivity},
+ * чтобы таймер начался с момента входа.
+ *
  * <p>Сохранение при выходе — в {@link PlayerQuitListener}.
  */
 public class PlayerJoinListener implements Listener {
@@ -32,6 +35,9 @@ public class PlayerJoinListener implements Listener {
         Player player = event.getPlayer();
 
         plugin.playerCache().record(player);
+
+        // ==== AFK — сбросить таймер активности ====
+        plugin.afk().touch(player);
 
         // ==== God ====
         plugin.gods().restore(player);

@@ -22,10 +22,7 @@ public class GamemodeManager {
     /** Ключ в таблице states. */
     private static final String KEY = "gamemode";
 
-    /** Предыдущий режим — для /gm back. Только в памяти. */
     private final Map<UUID, GameMode> previous = new ConcurrentHashMap<>();
-
-    /** Текущий режим, установленный через /gm. Сохраняется в БД. */
     private final Map<UUID, GameMode> current = new ConcurrentHashMap<>();
 
     private final StateStore store;
@@ -50,7 +47,6 @@ public class GamemodeManager {
 
     // ============ Current ============
 
-    /** Запомнить, что игрок был в этом режиме (для восстановления). */
     public void setCurrent(@NotNull Player player, @NotNull GameMode mode) {
         current.put(player.getUniqueId(), mode);
         store.setString(player.getUniqueId(), KEY, mode.name());
@@ -60,7 +56,16 @@ public class GamemodeManager {
         return current.get(player.getUniqueId());
     }
 
-    /** Убрать запись — если игрок сменил режим вручную, а не через /gm. */
+    /**
+     * Читает сохранённый GameMode из БД (работает и для офлайн-игроков).
+     * Для онлайн — сначала смотрит в память, потом в БД.
+     */
+    public @Nullable String getSavedGamemode(@NotNull UUID uuid) {
+        GameMode mem = current.get(uuid);
+        if (mem != null) return mem.name();
+        return store.getString(uuid, KEY);
+    }
+
     public void clearCurrent(@NotNull Player player) {
         current.remove(player.getUniqueId());
         store.clear(player.getUniqueId(), KEY);
@@ -68,10 +73,6 @@ public class GamemodeManager {
 
     // ============ Восстановление ============
 
-    /**
-     * Восстанавливает {@code current} из БД при входе игрока.
-     * Значение кладётся в память (в {@code current}).
-     */
     public void restore(@NotNull Player player) {
         String saved = store.getString(player.getUniqueId(), KEY);
         if (saved == null) return;
@@ -86,16 +87,8 @@ public class GamemodeManager {
 
     // ============ Общее ============
 
-    /**
-     * Очистка при выходе игрока.
-     *
-     * <p>{@code previous} удаляем полностью — он нужен только в рамках сессии.
-     * {@code current} тоже удаляем из памяти: значение остаётся в БД
-     * (его вернёт {@link #restore(Player)} при следующем входе),
-     * а память не растёт на каждого уникального игрока.
-     */
     public void clear(@NotNull UUID uuid) {
         previous.remove(uuid);
-        current.remove(uuid);   // ← фикс утечки памяти
+        current.remove(uuid);
     }
 }

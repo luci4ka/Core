@@ -26,6 +26,10 @@
 "info.version": "<gray>Версия:</gray> <white><value></white>"
 "info.server": "<gray>Сервер:</gray> <white><value></white>"
 "info.authors": "<gray>Авторы:</gray> <white><value></white>"
+"afk.enabled": "<yellow>💤</yellow> <white>Вы теперь AFK."
+"afk.disabled": "<green>✔</green> <white>Вы вернулись."
+"afk.other.enabled": "<yellow>💤</yellow> <white>Игрок <aqua><player></aqua> теперь AFK."
+"afk.other.disabled": "<green>✔</green> <white>Игрок <aqua><player></aqua> вернулся."
 
 # ============ 2. Мир (current / all) ============
 "current.world": "текущий"

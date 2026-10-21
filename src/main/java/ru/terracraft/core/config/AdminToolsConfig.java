@@ -38,6 +38,9 @@ public record AdminToolsConfig(
         @Comment("Настройки vanish")
         Vanish vanish,
 
+        @Comment("Настройки AFK")
+        Afk afk,
+
         @Comment("Настройки /compass (BossBar)")
         Compass compass,
 
@@ -90,6 +93,7 @@ public record AdminToolsConfig(
                 List.of()    // vanishDisabledWorlds
         );
         if (vanish       == null) vanish       = new Vanish(true, false, 100);
+        if (afk          == null) afk          = new Afk(300, 0);
         if (compass      == null) compass      = new Compass(30, 2, "BLUE", "PROGRESS");
         if (spawnMob     == null) spawnMob     = new SpawnMob(50, 1024, 2.0);
         if (time         == null) time         = new Time(3, 60);
@@ -240,6 +244,16 @@ public record AdminToolsConfig(
 
             @Comment("Период переприменения видимости (тики, 20 = 1 сек, 0 = отключено)")
             int reapplyPeriodTicks
+    ) {}
+
+    // ============ AFK ============
+
+    public record Afk(
+            @Comment("Таймаут AFK в секундах (0 = отключено)")
+            int timeoutSeconds,
+
+            @Comment("Кикать AFK-игроков через N секунд (0 = не кикать)")
+            int kickAfterSeconds
     ) {}
 
     // ============ COMPASS ============

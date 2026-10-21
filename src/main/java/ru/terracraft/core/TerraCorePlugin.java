@@ -2,24 +2,28 @@ package ru.terracraft.core;
 
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
+import ru.terracraft.api.TerraCoreAPI;
+import ru.terracraft.api.TerraCoreAPIImpl;
+import ru.terracraft.api.TerraCoreAdminAPI;
+import ru.terracraft.api.TerraCoreAdminAPIImpl;
 import ru.terracraft.core.command.CommandRegistrar;
 import ru.terracraft.core.config.ConfigManager;
 import ru.terracraft.core.hook.PlaceholderHook;
 import ru.terracraft.core.hook.UpdateNotifierHook;
 import ru.terracraft.core.lang.LangManager;
 import ru.terracraft.core.lang.MessageService;
-import ru.terracraft.core.listener.GodListener;
-import ru.terracraft.core.listener.PlayerJoinListener;
-import ru.terracraft.core.listener.PlayerQuitListener;
-import ru.terracraft.core.listener.VanishListener;
+import ru.terracraft.core.listener.*;
 import ru.terracraft.core.manager.*;
 import ru.terracraft.core.storage.MailService;
 import ru.terracraft.core.storage.PlayerCacheService;
 import ru.terracraft.core.storage.StateStore;
 import ru.terracraft.core.storage.StatsService;
 import ru.terracraft.core.storage.StorageManager;
+import ru.terracraft.core.task.AfkTask;
 import ru.terracraft.core.task.VanishTask;
 import ru.terracraft.core.util.StartupBanner;
 
@@ -45,13 +49,19 @@ public class TerraCorePlugin extends JavaPlugin {
     private CooldownManager cooldownManager;
     private VanishManager vanishManager;
     private ConfirmManager confirmManager;
+    private AfkManager afkManager;
 
     private VanishTask vanishTask;
+    private AfkTask afkTask;
+    private TerraCoreAPI api;
     private BukkitTask cooldownCleanupTask;
 
     @Override
     public void onEnable() {
         long t0 = System.currentTimeMillis();
+
+        // 0. PluginManager — нужен раньше, чем слушатели/команды
+        var pm = getServer().getPluginManager();
 
         // 1. Конфиг
         this.configManager = new ConfigManager(this);
@@ -78,9 +88,9 @@ public class TerraCorePlugin extends JavaPlugin {
         this.vanishManager   = new VanishManager(this, stateStore);
         this.confirmManager  = new ConfirmManager(this);
         this.confirmManager.start();
+        this.afkManager      = new AfkManager(this);
 
         // 5. Команды — только если CommandAPI загружен
-        var pm = getServer().getPluginManager();
         if (pm.getPlugin("CommandAPI") != null) {
             new CommandRegistrar(this).registerAll();
         } else {
@@ -92,10 +102,14 @@ public class TerraCorePlugin extends JavaPlugin {
         pm.registerEvents(new VanishListener(this), this);
         pm.registerEvents(new PlayerJoinListener(this), this);
         pm.registerEvents(new PlayerQuitListener(this), this);
+        pm.registerEvents(new AfkListener(this), this);
 
         // 7. Задачи
         this.vanishTask = new VanishTask(this);
         this.vanishTask.start();
+
+        // AFK-детект — раз в 30 секунд
+        startAfkTask();
 
         // Периодическая очистка просроченных кулдаунов — период из config.yml
         startCooldownCleanup();
@@ -127,7 +141,25 @@ public class TerraCorePlugin extends JavaPlugin {
             UpdateNotifierHook.check(this);
         }
 
-        // 11. Красивая панель запуска
+        // 11. Регистрация публичного API
+
+        this.api = new TerraCoreAPIImpl(this);
+        getServer().getServicesManager().register(
+                TerraCoreAPI.class, api, this, ServicePriority.Normal);
+
+        getLogger().info("TerraCoreAPI registered in ServicesManager.");
+
+        // в onEnable(), после TerraCoreAPI:
+        getServer().getServicesManager().register(
+                TerraCoreAdminAPI.class,
+                new TerraCoreAdminAPIImpl(this),
+                this,
+                ServicePriority.Normal
+        );
+        getLogger().info("TerraCoreAdminAPI registered in ServicesManager.");
+
+
+        // 12. Красивая панель запуска
         long elapsed = System.currentTimeMillis() - t0;
         StartupBanner.printStartup(this, elapsed, BSTATS_ID);
     }
@@ -137,6 +169,7 @@ public class TerraCorePlugin extends JavaPlugin {
         long uptime = System.currentTimeMillis() - startTime;
 
         if (vanishTask != null) vanishTask.stop();
+        if (afkTask != null) afkTask.cancel();
         if (cooldownCleanupTask != null) cooldownCleanupTask.cancel();
         if (confirmManager != null) confirmManager.stop();
 
@@ -158,6 +191,13 @@ public class TerraCorePlugin extends JavaPlugin {
             cooldownCleanupTask = null;
         }
         startCooldownCleanup();
+
+        // AFK-задача — перезапуск (мог измениться timeoutSeconds)
+        if (afkTask != null) {
+            afkTask.cancel();
+            afkTask = null;
+        }
+        startAfkTask();
     }
 
     /** Запуск задачи очистки кулдаунов с периодом из config.yml. */
@@ -171,6 +211,18 @@ public class TerraCorePlugin extends JavaPlugin {
         this.cooldownCleanupTask = getServer().getScheduler().runTaskTimerAsynchronously(
                 this, () -> cooldownManager.cleanupExpired(), period, period);
         getLogger().info("Cooldown cleanup scheduled every " + minutes + " min.");
+    }
+
+    /** Запуск AFK-задачи. */
+    private void startAfkTask() {
+        int timeout = configManager.get().afk().timeoutSeconds();
+        if (timeout <= 0) {
+            getLogger().info("AFK detection disabled (afk.timeoutSeconds = 0).");
+            return;
+        }
+        this.afkTask = new AfkTask(this);
+        this.afkTask.runTaskTimer(this, 20L * 30, 20L * 30);   // раз в 30 сек
+        getLogger().info("AFK detection scheduled (timeout=" + timeout + "s).");
     }
 
     // ============ Геттеры ============
@@ -193,4 +245,7 @@ public class TerraCorePlugin extends JavaPlugin {
     public CooldownManager cooldowns() { return cooldownManager; }
     public VanishManager vanish()      { return vanishManager; }
     public ConfirmManager confirms()   { return confirmManager; }
+    public AfkManager afk()            { return afkManager; }
+    public @NotNull TerraCoreAPI api() { return api; }
+
 }

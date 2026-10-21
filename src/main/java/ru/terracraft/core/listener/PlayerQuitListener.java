@@ -94,5 +94,7 @@ public class PlayerQuitListener implements Listener {
 
         // ==== Gamemode previous — сбрасываем, current в БД остаётся ====
         plugin.gamemodes().clear(id);
+        // ==== AFK — полная очистка (сессионное состояние) ====
+        plugin.afk().clear(id);
     }
 }
