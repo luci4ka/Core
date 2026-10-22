@@ -1,12 +1,12 @@
-# TerraCore
+# TerraCraftCore
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
-[![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/projects/jdk/21/)
+[![Build Status](https://github.com/luci4ka/TerraCraftCore/actions/workflows/release.yml/badge.svg)](https://github.com/luci4ka/TerraCraftCore/actions/workflows/release.yml)
+[![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/projects/jdk/25/)
 [![Paper](https://img.shields.io/badge/Paper-1.21.11-blue.svg)](https://papermc.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![JitPack](https://img.shields.io/badge/JitPack-ready-brightgreen.svg)](https://jitpack.io/#luci4ka/TerraCraftCore)
 
-> **TerraCore** — ядро админ-инструментов для Paper-сервера.
+> **TerraCraftCore** — ядро админ-инструментов для Paper-сервера.
 > ~40 команд, публичный API, AFK-детект, локализация (RU/EN), гибкий конфиг, персистентность в MariaDB через MineSQL.
 
 ---
@@ -34,6 +34,7 @@
 ## ✨ Возможности
 
 ### Управление игроками
+
 - **`/god`** — режим бессмертия (урон не проходит).
 - **`/fly`** — полёт (с ограничением по мирам).
 - **`/vanish`** — невидимость с `hidePlayer` и metadata для TAB.
@@ -44,6 +45,7 @@
 - **`/burn`**, **`/ice`**, **`/ext`**, **`/suicide`** — действия над игроком.
 
 ### Предметы
+
 - **`/repair`** — починка предмета или всего инвентаря (с подтверждением).
 - **`/enchant`** — энчант с опцией обхода ограничений (`enchant.unsafe`).
 - **`/give`**, **`/more`**, **`/skull`**, **`/clear`**.
@@ -52,6 +54,7 @@
 - **`/tree`** — посадить дерево.
 
 ### Мир и время
+
 - **`/weather`**, **`/time`** — управление погодой/временем (с блокировкой).
 - **`/time smooth`** — плавная смена времени с настраиваемой длительностью.
 - **`/ptime`**, **`/pweather`** — личное время/погода.
@@ -59,16 +62,19 @@
 - **`/workbench`**, **`/anvil`**, **`/loom`**, **`/grindstone`**, **`/stonecutter`**, **`/smithingtable`**, **`/enderchest`**.
 
 ### Перемещение
+
 - **`/top`**, **`/jump`** — телепорт на верх/в точку взгляда.
 - **`/compass`** — BossBar-компас с настраиваемым цветом и стилем.
 
 ### Информация
+
 - **`/gc`** — TPS, память, чанки, сущности, аптайм.
 - **`/whois`**, **`/seen`**, **`/near`**, **`/list`**, **`/ping`** (с цветовыми порогами).
 - **`/getpos`**, **`/depth`**.
 - **`/terracore reload`**, **`/terracore info`**, **`/terracore lang`**.
 
 ### Архитектура
+
 - **Persistent state** — кулдауны, god/fly/vanish/gamemode переживают рестарт.
 - **AFK-детект** — автоматически по таймауту + вручную `/afk`.
 - **Статистика** — счётчик использований каждой команды.
@@ -83,19 +89,19 @@
 
 ## 📋 Требования
 
-| Компонент | Версия |
-|-----------|--------|
-| **Java** | 25+ |
-| **Paper** | 1.21.11+ (используется `RegistryAccess`, `GameRules`, `MenuType.create(...)`) |
-| **CommandAPI** | 12.1.0+ (обязательно) |
-| **MineSQL** | 1.4.2+ (обязательно) |
-| **PlaceholderAPI** | 2.12.3+ (опционально) |
+| Компонент          | Версия                                                                        |
+|--------------------|-------------------------------------------------------------------------------|
+| **Java**           | 25+                                                                           |
+| **Paper**          | 1.21.11+ (используется `RegistryAccess`, `GameRules`, `MenuType.create(...)`) |
+| **CommandAPI**     | 12.1.0+ (обязательно)                                                         |
+| **MineSQL**        | 1.4.2+ (обязательно)                                                          |
+| **PlaceholderAPI** | 2.12.3+ (опционально)                                                         |
 
 ---
 
 ## 🚀 Установка
 
-1. Скачайте `Core-x.y.z.jar` из [Releases](https://github.com/luci4ka/TerraCraftCore/releases).
+1. Скачайте `TerraCraftCore-x.y.z.jar` из [Releases](https://github.com/luci4ka/TerraCraftCore/releases).
 2. Положите в `plugins/`.
 3. Установите [CommandAPI](https://www.spigotmc.org/resources/commandapi.79504/) версии **12.1.0+**.
 4. Установите [MineSQL](https://github.com/CarmJos/MineSQL) и настройте источник `terracore` в `plugins/MineSQL/config.yml`:
@@ -112,7 +118,7 @@
 5. (Опционально) Установите [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/).
 6. Запустите сервер — создастся:
    ```
-   plugins/TerraCore/
+   plugins/TerraCraftCore/
    ├── config.yml
    └── lang/
        ├── en_us.yml
@@ -240,16 +246,16 @@ storage:
 
 ### Что сохраняется
 
-| Данные | `state_key` / таблица | Переживает рестарт? |
-|--------|----------------------|---------------------|
-| Кулдауны | `tc_cooldowns` | ✅ |
-| God | `tc_states`, key=`god` | ✅ |
-| Fly | `tc_states`, key=`fly` | ✅ |
-| Vanish | `tc_states`, key=`vanish` | ✅ |
-| Gamemode current | `tc_states`, key=`gamemode` | ✅ |
-| Статистика | `tc_stats` | ✅ |
-| Офлайн-кэш | `tc_players` | ✅ |
-| Почта | `tc_mail` | ✅ |
+| Данные           | `state_key` / таблица       | Переживает рестарт? |
+|------------------|-----------------------------|---------------------|
+| Кулдауны         | `tc_cooldowns`              | ✅                   |
+| God              | `tc_states`, key=`god`      | ✅                   |
+| Fly              | `tc_states`, key=`fly`      | ✅                   |
+| Vanish           | `tc_states`, key=`vanish`   | ✅                   |
+| Gamemode current | `tc_states`, key=`gamemode` | ✅                   |
+| Статистика       | `tc_stats`                  | ✅                   |
+| Офлайн-кэш       | `tc_players`                | ✅                   |
+| Почта            | `tc_mail`                   | ✅                   |
 
 ### Схема БД (v2)
 
@@ -316,7 +322,7 @@ CREATE TABLE tc_mail (
 ### Файлы
 
 ```
-plugins/TerraCore/lang/
+plugins/TerraCraftCore/lang/
 ├── en_us.yml
 └── ru_ru.yml
 ```
@@ -344,58 +350,58 @@ plugins/TerraCore/lang/
 
 ```yaml
 "god.enabled.self": "<green><sprite:items:item/netherite_chestplate> <white>Godmode <green>включён</green>."
-"prefix": " <gradient:#00d4ff:#7b2ff7>Core</gradient><sprite:items:item/emerald><reset>"
+"prefix": " <gradient:#00d4ff:#7b2ff7>TerraCraftCore</gradient><sprite:items:item/emerald><reset>"
 ```
 
 ---
 
 ## 🔌 PlaceholderAPI
 
-| Плейсхолдер | Значение |
-|-------------|----------|
-| `%terracore_god%` | `true`/`false` |
-| `%terracore_fly%` | `true`/`false` |
-| `%terracore_vanished%` | `true`/`false` |
-| `%terracore_afk%` | `true`/`false` |
-| `%terracore_vanished_count%` | сколько vanished онлайн |
-| `%terracore_vanished_list%` | имена vanished через запятую |
-| `%terracore_god_count%` | сколько в god |
-| `%terracore_fly_count%` | сколько в fly |
-| `%terracore_afk_count%` | сколько AFK |
-| `%terracore_ping%` | пинг (мс) |
-| `%terracore_ping_color%` | `green` / `yellow` / `red` |
-| `%terracore_ping_colored%` | `<green>42</green>` (MiniMessage) |
-| `%terracore_world%` | имя мира |
-| `%terracore_world_time%` | тики времени мира |
-| `%terracore_world_time_name%` | «утро» / «день» / ... |
-| `%terracore_world_weather%` | `sun` / `rain` / `storm` |
-| `%terracore_world_weather_name%` | «☀ ясно» / «☂ дождь» / «⚡ гроза» |
-| `%terracore_gamemode%` | локализованное имя режима |
-| `%terracore_gamemode_id%` | `SURVIVAL`/`CREATIVE`/... |
-| `%terracore_health%` | HP (напр. `18.5`) |
-| `%terracore_health_hearts%` | HP в сердцах (`9.2`) |
-| `%terracore_health_percent%` | HP в % (`0..100`) |
-| `%terracore_food%` | еда (`0..20`) |
-| `%terracore_saturation%` | сатурация |
-| `%terracore_level%` | уровень опыта |
-| `%terracore_exp%` | прогресс до след. уровня |
-| `%terracore_walk_speed%` | скорость ходьбы |
-| `%terracore_fly_speed%` | скорость полёта |
-| `%terracore_fire_ticks%` | тики горения |
-| `%terracore_freeze_ticks%` | тики заморозки |
-| `%terracore_burning%` | `true`/`false` |
-| `%terracore_frozen%` | `true`/`false` |
-| `%terracore_compass%` | `N` / `E` / `S` / `W` |
-| `%terracore_compass_localized%` | «Север» / «Восток» / ... |
-| `%terracore_compass_sector%` | `0..3` (0=N, 1=E, 2=S, 3=W) |
-| `%terracore_cooldown_<cmd>%` | секунд до конца кулдауна |
-| `%terracore_cooldown_<cmd>_raw%` | без `+1` |
-| `%terracore_mail_unread%` | непрочитанных писем |
-| `%terracore_enchant_max%` | `enchant.max-level` |
-| `%terracore_give_max%` | `give.max-amount` |
-| `%terracore_spawnmob_max%` | `spawn-mob.max-count` |
-| `%terracore_near_radius%` | `near.default-radius` |
-| `%terracore_compass_duration%` | `compass.duration-seconds` |
+| Плейсхолдер                      | Значение                          |
+|----------------------------------|-----------------------------------|
+| `%terracore_god%`                | `true`/`false`                    |
+| `%terracore_fly%`                | `true`/`false`                    |
+| `%terracore_vanished%`           | `true`/`false`                    |
+| `%terracore_afk%`                | `true`/`false`                    |
+| `%terracore_vanished_count%`     | сколько vanished онлайн           |
+| `%terracore_vanished_list%`      | имена vanished через запятую      |
+| `%terracore_god_count%`          | сколько в god                     |
+| `%terracore_fly_count%`          | сколько в fly                     |
+| `%terracore_afk_count%`          | сколько AFK                       |
+| `%terracore_ping%`               | пинг (мс)                         |
+| `%terracore_ping_color%`         | `green` / `yellow` / `red`        |
+| `%terracore_ping_colored%`       | `<green>42</green>` (MiniMessage) |
+| `%terracore_world%`              | имя мира                          |
+| `%terracore_world_time%`         | тики времени мира                 |
+| `%terracore_world_time_name%`    | «утро» / «день» / ...             |
+| `%terracore_world_weather%`      | `sun` / `rain` / `storm`          |
+| `%terracore_world_weather_name%` | «☀ ясно» / «☂ дождь» / «⚡ гроза»  |
+| `%terracore_gamemode%`           | локализованное имя режима         |
+| `%terracore_gamemode_id%`        | `SURVIVAL`/`CREATIVE`/...         |
+| `%terracore_health%`             | HP (напр. `18.5`)                 |
+| `%terracore_health_hearts%`      | HP в сердцах (`9.2`)              |
+| `%terracore_health_percent%`     | HP в % (`0..100`)                 |
+| `%terracore_food%`               | еда (`0..20`)                     |
+| `%terracore_saturation%`         | сатурация                         |
+| `%terracore_level%`              | уровень опыта                     |
+| `%terracore_exp%`                | прогресс до след. уровня          |
+| `%terracore_walk_speed%`         | скорость ходьбы                   |
+| `%terracore_fly_speed%`          | скорость полёта                   |
+| `%terracore_fire_ticks%`         | тики горения                      |
+| `%terracore_freeze_ticks%`       | тики заморозки                    |
+| `%terracore_burning%`            | `true`/`false`                    |
+| `%terracore_frozen%`             | `true`/`false`                    |
+| `%terracore_compass%`            | `N` / `E` / `S` / `W`             |
+| `%terracore_compass_localized%`  | «Север» / «Восток» / ...          |
+| `%terracore_compass_sector%`     | `0..3` (0=N, 1=E, 2=S, 3=W)       |
+| `%terracore_cooldown_<cmd>%`     | секунд до конца кулдауна          |
+| `%terracore_cooldown_<cmd>_raw%` | без `+1`                          |
+| `%terracore_mail_unread%`        | непрочитанных писем               |
+| `%terracore_enchant_max%`        | `enchant.max-level`               |
+| `%terracore_give_max%`           | `give.max-amount`                 |
+| `%terracore_spawnmob_max%`       | `spawn-mob.max-count`             |
+| `%terracore_near_radius%`        | `near.default-radius`             |
+| `%terracore_compass_duration%`   | `compass.duration-seconds`        |
 
 **Пример:** `%terracore_cooldown_heal%` → `0`, если кулдауна нет.
 
@@ -403,7 +409,7 @@ plugins/TerraCore/lang/
 
 ## 🔌 Публичный API
 
-TerraCore предоставляет два интерфейса через `ServicesManager`.
+TerraCraftCore предоставляет два интерфейса через `ServicesManager`.
 
 ### `TerraCoreAPI` — безопасные данные
 
@@ -465,95 +471,95 @@ public void onAfk(TerraAfkChangeEvent e) { ... }
 
 ### Управление
 
-| Команда | Право | Описание |
-|---------|-------|----------|
-| `/terracore reload` | `terracraft.core.reload` | Перечитать конфиг + языки |
-| `/terracore info` | `terracraft.core.info` | Версия, сервер, авторы |
-| `/terracore lang` | `terracraft.core.lang` | Список локалей + % заполнения |
+| Команда             | Право                    | Описание                      |
+|---------------------|--------------------------|-------------------------------|
+| `/terracore reload` | `terracraft.core.reload` | Перечитать конфиг + языки     |
+| `/terracore info`   | `terracraft.core.info`   | Версия, сервер, авторы        |
+| `/terracore lang`   | `terracraft.core.lang`   | Список локалей + % заполнения |
 
 ### Состояния
 
-| Команда | Право | Описание |
-|---------|-------|----------|
-| `/god [player]` | `terracraft.core.god[.others]` | Бессмертие |
-| `/fly [player]` | `terracraft.core.fly[.others]` | Полёт |
-| `/vanish [player]` | `terracraft.core.vanish[.others]` | Невидимость |
-| `/vanish list` | `terracraft.core.vanish.see` | Список vanished |
-| `/afk [player]` | `terracraft.core.afk[.others]` | AFK-статус |
+| Команда                     | Право                               | Описание                       |
+|-----------------------------|-------------------------------------|--------------------------------|
+| `/god [player]`             | `terracraft.core.god[.others]`      | Бессмертие                     |
+| `/fly [player]`             | `terracraft.core.fly[.others]`      | Полёт                          |
+| `/vanish [player]`          | `terracraft.core.vanish[.others]`   | Невидимость                    |
+| `/vanish list`              | `terracraft.core.vanish.see`        | Список vanished                |
+| `/afk [player]`             | `terracraft.core.afk[.others]`      | AFK-статус                     |
 | `/gamemode <mode> [player]` | `terracraft.core.gamemode[.others]` | Смена режима (`s/c/a/sp/back`) |
 
 ### Здоровье / еда / скорость
 
-| Команда | Право | Описание |
-|---------|-------|----------|
-| `/heal [player]` | `terracraft.core.heal[.others]` | Лечение (шанс в конфиге) |
-| `/feed [player]` | `terracraft.core.feed[.others]` | Кормление (шанс) |
-| `/speed <0-10> [walk\|fly] [player]` | `terracraft.core.speed[.others]` | Скорость |
+| Команда                              | Право                            | Описание                 |
+|--------------------------------------|----------------------------------|--------------------------|
+| `/heal [player]`                     | `terracraft.core.heal[.others]`  | Лечение (шанс в конфиге) |
+| `/feed [player]`                     | `terracraft.core.feed[.others]`  | Кормление (шанс)         |
+| `/speed <0-10> [walk\|fly] [player]` | `terracraft.core.speed[.others]` | Скорость                 |
 
 ### Предметы
 
-| Команда | Право | Описание |
-|---------|-------|----------|
-| `/repair [all\|confirm\|cancel]` | `terracraft.core.repair[.all]` | Починка |
-| `/enchant <ench> [level]` | `terracraft.core.enchant` + `.unsafe` | Энчант (обход ограничений с `.unsafe`) |
-| `/give <player> <item> [amount]` | `terracraft.core.give` | Выдать предмет |
-| `/hat [player]` | `terracraft.core.hat[.others]` | Надеть блок / снять шлем |
-| `/more` | `terracraft.core.more` | Пополнить стак |
-| `/skull [player]` | `terracraft.core.skull[.others]` | Голова игрока (онлайн + офлайн) |
-| `/tree <type>` | `terracraft.core.tree` | Посадить дерево |
-| `/itemname <name\|reset>` | `terracraft.core.itemname` | Имя предмета (MiniMessage) |
-| `/itemlore add\|set\|remove\|clear\|list` | `terracraft.core.itemlore` | Lore предмета |
-| `/clear [player]` | `terracraft.core.clear[.others]` | Очистить инвентарь |
+| Команда                                   | Право                                 | Описание                               |
+|-------------------------------------------|---------------------------------------|----------------------------------------|
+| `/repair [all\|confirm\|cancel]`          | `terracraft.core.repair[.all]`        | Починка                                |
+| `/enchant <ench> [level]`                 | `terracraft.core.enchant` + `.unsafe` | Энчант (обход ограничений с `.unsafe`) |
+| `/give <player> <item> [amount]`          | `terracraft.core.give`                | Выдать предмет                         |
+| `/hat [player]`                           | `terracraft.core.hat[.others]`        | Надеть блок / снять шлем               |
+| `/more`                                   | `terracraft.core.more`                | Пополнить стак                         |
+| `/skull [player]`                         | `terracraft.core.skull[.others]`      | Голова игрока (онлайн + офлайн)        |
+| `/tree <type>`                            | `terracraft.core.tree`                | Посадить дерево                        |
+| `/itemname <name\|reset>`                 | `terracraft.core.itemname`            | Имя предмета (MiniMessage)             |
+| `/itemlore add\|set\|remove\|clear\|list` | `terracraft.core.itemlore`            | Lore предмета                          |
+| `/clear [player]`                         | `terracraft.core.clear[.others]`      | Очистить инвентарь                     |
 
 ### Мир / мобы
 
-| Команда | Право | Описание |
-|---------|-------|----------|
-| `/spawnmob <type[:variant]> [name] [health] [count]` | `terracraft.core.spawnmob` | Спавн мобов |
-| `/workbench` | `terracraft.core.workbench` | Верстак |
-| `/anvil` / `/loom` / `/grindstone` / `/stonecutter` / `/smithingtable` | `terracraft.core.<name>` | Соответствующий верстак |
-| `/enderchest [player]` | `terracraft.core.enderchest[.others]` | Эндерчест |
+| Команда                                                                | Право                                 | Описание                |
+|------------------------------------------------------------------------|---------------------------------------|-------------------------|
+| `/spawnmob <type[:variant]> [name] [health] [count]`                   | `terracraft.core.spawnmob`            | Спавн мобов             |
+| `/workbench`                                                           | `terracraft.core.workbench`           | Верстак                 |
+| `/anvil` / `/loom` / `/grindstone` / `/stonecutter` / `/smithingtable` | `terracraft.core.<name>`              | Соответствующий верстак |
+| `/enderchest [player]`                                                 | `terracraft.core.enderchest[.others]` | Эндерчест               |
 
 ### Погода / время
 
-| Команда | Право | Описание |
-|---------|-------|----------|
-| `/weather <sun\|rain\|storm> [world\|all]` | `terracraft.core.weather[.all]` | Погода |
-| `/weather lock\|unlock` | `terracraft.core.weather.lock` | Зафиксировать погоду |
-| `/time <day\|noon\|night\|midnight\|dawn\|dusk> [instant] [world\|all]` | `terracraft.core.time[.all]` | Время |
-| `/time set\|add\|freeze\|smooth` | `terracraft.core.time[.freeze]` / `.smooth` | Управление временем |
-| `/ptime <preset> [player]` | `terracraft.core.ptime[.others]` | Личное время |
-| `/pweather <preset> [player]` | `terracraft.core.pweather[.others]` | Личная погода |
+| Команда                                                                 | Право                                       | Описание             |
+|-------------------------------------------------------------------------|---------------------------------------------|----------------------|
+| `/weather <sun\|rain\|storm> [world\|all]`                              | `terracraft.core.weather[.all]`             | Погода               |
+| `/weather lock\|unlock`                                                 | `terracraft.core.weather.lock`              | Зафиксировать погоду |
+| `/time <day\|noon\|night\|midnight\|dawn\|dusk> [instant] [world\|all]` | `terracraft.core.time[.all]`                | Время                |
+| `/time set\|add\|freeze\|smooth`                                        | `terracraft.core.time[.freeze]` / `.smooth` | Управление временем  |
+| `/ptime <preset> [player]`                                              | `terracraft.core.ptime[.others]`            | Личное время         |
+| `/pweather <preset> [player]`                                           | `terracraft.core.pweather[.others]`         | Личная погода        |
 
 ### Перемещение
 
-| Команда | Право | Описание |
-|---------|-------|----------|
-| `/top` | `terracraft.core.top` | На верхний блок |
-| `/jump` | `terracraft.core.jump` | Прыжок до 100 блоков |
-| `/compass` | `terracraft.core.compass` | BossBar-компас |
+| Команда    | Право                     | Описание             |
+|------------|---------------------------|----------------------|
+| `/top`     | `terracraft.core.top`     | На верхний блок      |
+| `/jump`    | `terracraft.core.jump`    | Прыжок до 100 блоков |
+| `/compass` | `terracraft.core.compass` | BossBar-компас       |
 
 ### Действия над игроком
 
-| Команда | Право | Описание |
-|---------|-------|----------|
-| `/ext [player]` | `terracraft.core.ext[.others]` | Потушить |
-| `/suicide` | `terracraft.core.suicide` | Самоубийство |
-| `/burn <player> [seconds]` | `terracraft.core.burn[.others]` | Поджечь |
-| `/ice <player> [seconds]` | `terracraft.core.ice[.others]` | Заморозить |
+| Команда                    | Право                           | Описание     |
+|----------------------------|---------------------------------|--------------|
+| `/ext [player]`            | `terracraft.core.ext[.others]`  | Потушить     |
+| `/suicide`                 | `terracraft.core.suicide`       | Самоубийство |
+| `/burn <player> [seconds]` | `terracraft.core.burn[.others]` | Поджечь      |
+| `/ice <player> [seconds]`  | `terracraft.core.ice[.others]`  | Заморозить   |
 
 ### Информация
 
-| Команда | Право | Описание |
-|---------|-------|----------|
-| `/gc` | `terracraft.core.gc` | TPS, память, чанки, аптайм |
-| `/getpos [player]` | `terracraft.core.getpos[.others]` | Координаты |
-| `/depth` | `terracraft.core.depth` | Глубина от бедрока |
-| `/whois <player>` | `terracraft.core.whois[.others]` | Подробно об игроке (онлайн + офлайн) |
-| `/near [radius]` | `terracraft.core.near` | Игроки рядом |
-| `/seen <player>` | `terracraft.core.seen[.others]` | Когда был онлайн (онлайн + офлайн) |
-| `/list` | `terracraft.core.list` | Кто онлайн |
-| `/ping [player]` | `terracraft.core.ping[.others]` | Пинг (с цветом) |
+| Команда            | Право                             | Описание                             |
+|--------------------|-----------------------------------|--------------------------------------|
+| `/gc`              | `terracraft.core.gc`              | TPS, память, чанки, аптайм           |
+| `/getpos [player]` | `terracraft.core.getpos[.others]` | Координаты                           |
+| `/depth`           | `terracraft.core.depth`           | Глубина от бедрока                   |
+| `/whois <player>`  | `terracraft.core.whois[.others]`  | Подробно об игроке (онлайн + офлайн) |
+| `/near [radius]`   | `terracraft.core.near`            | Игроки рядом                         |
+| `/seen <player>`   | `terracraft.core.seen[.others]`   | Когда был онлайн (онлайн + офлайн)   |
+| `/list`            | `terracraft.core.list`            | Кто онлайн                           |
+| `/ping [player]`   | `terracraft.core.ping[.others]`   | Пинг (с цветом)                      |
 
 ---
 
@@ -567,6 +573,7 @@ public void onAfk(TerraAfkChangeEvent e) { ... }
 - `terracraft.core.lang` — `/tc lang`.
 
 Для команд с `.others`:
+
 - `terracraft.core.god` — себе, `terracraft.core.god.others` — другим.
 - Аналогично `fly`, `vanish`, `afk`, `heal`, `feed`, `speed`, `gamemode`, `enderchest`, `ptime`, `pweather`, `ext`, `ping`, `getpos`, `hat`, `skull`, `clear`, `whois`, `seen`, `burn`, `ice`.
 - `terracraft.core.repair` + `terracraft.core.repair.all`.
@@ -600,7 +607,7 @@ cd TerraCraftCore
 ./gradlew clean test build
 
 # JAR появится в:
-# build/libs/Core-1.0.2.jar
+# build/libs/TerraCraftCore-1.0.2.jar
 ```
 
 ### Windows
@@ -646,17 +653,19 @@ dependencies {
 ```yaml
 dependencies:
   server:
-    Core:
+    TerraCraftCore:
       load: BEFORE
       required: true
-      join-classpath: true   # ← критично для доступа к классам Core
+      join-classpath: true   # ← критично для доступа к классам TerraCraftCore
 ```
 
 ### 3. Использование API
 
 ```java
 TerraCoreAPI api = Bukkit.getServicesManager().load(TerraCoreAPI.class);
-if (api != null && api.isAfk(player)) { ... }
+if (api != null && api.isAfk(player)) {
+    // игрок AFK
+}
 ```
 
 ---
@@ -676,10 +685,10 @@ if (api != null && api.isAfk(player)) { ... }
 
 ### Что тестируется
 
-| Класс | Что проверяет |
-|-------|---------------|
-| `ConfirmManagerTest` | `consume`/`cancel`/`clear`/`expire` |
-| `LangManagerTest` | Каскад локалей, полнота `.yml` (все `LangKey` есть в `en_US` и `ru_RU`) |
+| Класс                | Что проверяет                                                          |
+|----------------------|------------------------------------------------------------------------|
+| `ConfirmManagerTest` | `consume`/`cancel`/`clear`/`expire`                                    |
+| `LangManagerTest`    | Каскад локалей, полнота `.yml` (все `LangKey` есть в `en_US` и `ru_RU`) |
 
 ---
 
@@ -740,3 +749,4 @@ ru.terracraft
 Сделано с ❤️
 
 </div>
+```

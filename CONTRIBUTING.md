@@ -1,5 +1,5 @@
 
-# Contributing to TerraCore
+# Contributing to TerraCraftCore
 
 Спасибо, что хотите помочь! Ниже — правила, чтобы всё прошло гладко.
 
@@ -29,7 +29,12 @@ git remote add upstream https://github.com/luci4ka/TerraCraftCore.git
 
 # 4. Проверьте сборку
 ./gradlew clean build -x test
+
+# 5. (Опционально) проверьте, что JitPack-конфиг на месте
+cat jitpack.yml   # должно быть: jdk: [openjdk25]
 ```
+
+> **Требуется `gradlew` в репозитории.** Если его нет — `gradle wrapper --gradle-version 9.3.0`.
 
 ---
 
@@ -42,11 +47,13 @@ git remote add upstream https://github.com/luci4ka/TerraCraftCore.git
 | `feature/<name>` | Новая фича |
 | `fix/<name>` | Багфикс |
 | `docs/<name>` | Документация |
+| `api/<name>` | Изменения публичного API (`ru.terracraft.api.*`) |
 
 **Правила:**
 - Один PR — одна задача.
 - Ветку создавайте от `dev`, не от `main`.
 - Название — `feature/teleport-command`, `fix/vanish-npe`, `docs/readme-update`.
+- **Изменения в `ru.terracraft.api.*`** → отдельный PR с меткой `api` + обновление `CHANGELOG` (breaking changes!).
 
 ---
 
@@ -61,7 +68,7 @@ git remote add upstream https://github.com/luci4ka/TerraCraftCore.git
     - `PascalCase` — классы.
     - `camelCase` — методы, поля.
     - `UPPER_SNAKE_CASE` — константы.
-    - Пакеты — `ru.terracraft.core.*`.
+    - Пакеты — `ru.terracraft.core.*` (внутренние) / `ru.terracraft.api.*` (публичные).
 - **Javadoc** — для публичных классов и методов. Кратко, по делу.
 - **`@NotNull` / `@Nullable`** — обязательно для параметров и возвращаемых значений (JetBrains annotations).
 - **`final`** — для полей, которые не меняются.
@@ -105,6 +112,57 @@ public void burn(@NotNull Player target, int seconds) {
 
 ---
 
+## 🔌 Публичный API (`ru.terracraft.api.*`)
+
+Изменения в пакете `ru.terracraft.api.*` **критичны** — их используют другие плагины.
+
+### Правила
+
+1. **Не удаляйте** существующие методы/поля. Только `@Deprecated` + пометка в Javadoc.
+2. **Не меняйте** сигнатуры (`return type`, `parameter types`).
+3. **Не меняйте** имена пакетов, классов, методов.
+4. **Новые методы** — только `default` в интерфейсах (для обратной совместимости).
+5. **Breaking changes** — только в мажорной версии (`2.0.0`), с записью в `CHANGELOG`.
+
+### Что считается API
+
+| Пакет | Публичный? |
+|-------|-----------|
+| `ru.terracraft.api.TerraCoreAPI` | ✅ |
+| `ru.terracraft.api.TerraCoreAdminAPI` | ✅ |
+| `ru.terracraft.api.dto.*` | ✅ |
+| `ru.terracraft.api.event.*` | ✅ |
+| `ru.terracraft.core.*` | ❌ (внутренние) |
+
+### JitPack
+
+Публичный API отдаётся через JitPack как **тонкий** JAR (только API + `core.*`, без `bstats`/`configlib`). Подключение в другом плагине:
+
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compileOnly 'com.github.luci4ka:TerraCraftCore:1.0.2'
+}
+```
+
+И **обязательно** в `paper-plugin.yml`:
+
+```yaml
+dependencies:
+  server:
+    TerraCraftCore:
+      load: BEFORE
+      required: true
+      join-classpath: true   # ← критично!
+```
+
+> Без `join-classpath: true` классы `TerraCoreAPI` не будут видны в рантайме — получите `NoClassDefFoundError`.
+
+---
+
 ## 🧪 Тесты
 
 ### Запуск
@@ -114,7 +172,7 @@ public void burn(@NotNull Player target, int seconds) {
 ./gradlew test
 
 # Один класс
-./gradlew test --tests "ru.terracraft.core.autotest.ConfirmManagerTest"
+./gradlew test --tests "ru.terracraft.core.autotest.LangManagerTest"
 
 # С подробным выводом
 ./gradlew test --console=plain
@@ -125,6 +183,7 @@ public void burn(@NotNull Player target, int seconds) {
 - **Новая команда** → тест в `src/test/java/ru/terracraft/core/autotest/<Name>Test.java`.
 - **Новый менеджер** → тест на `MockBukkit`.
 - **Новый `LangKey`** → `LangManagerTest` автоматически проверит, что ключ есть в `.lang`.
+- **Новый метод API** → тест в `TerraCoreAPITest` (если есть).
 
 ### Стиль тестов
 
@@ -219,12 +278,19 @@ chore(deps): bump configlib to 4.1.0
 
 4. **Обновите `CHANGELOG.md`** (секция `Unreleased`).
 
-5. **Запушьте**:
+5. **Проверьте, что JAR называется правильно**:
+   ```bash
+   ls build/libs/
+   # TerraCraftCore-1.0.2.jar
+   # TerraCraftCore-1.0.2-thin.jar
+   ```
+
+6. **Запушьте**:
    ```bash
    git push origin feature/my-feature
    ```
 
-6. **Откройте PR** на GitHub → `dev`.
+7. **Откройте PR** на GitHub → `dev`.
 
 ### Что должно быть в PR
 
@@ -237,6 +303,8 @@ chore(deps): bump configlib to 4.1.0
     - [ ] `CHANGELOG.md` обновлён
     - [ ] `README.md` обновлён (если нужно)
     - [ ] Локализация: добавлены ключи в `en_us.yml` и `ru_ru.yml`
+    - [ ] Если затронут API — метка `api` + запись в `CHANGELOG` (breaking changes)
+    - [ ] JAR называется `TerraCraftCore-<version>.jar`
 
 ---
 
@@ -244,7 +312,7 @@ chore(deps): bump configlib to 4.1.0
 
 Используйте [GitHub Issues](https://github.com/luci4ka/TerraCraftCore/issues). Включите:
 
-1. **Версию TerraCore** (`/tc info`).
+1. **Версию TerraCraftCore** (`/tc info`).
 2. **Версию Paper** и **Java**.
 3. **Список плагинов** (если конфликт).
 4. **Шаги воспроизведения**:

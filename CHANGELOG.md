@@ -1,7 +1,6 @@
-
 # Changelog
 
-Все заметные изменения в TerraCore.
+Все заметные изменения в TerraCraftCore.
 
 Формат — [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/).
 Версионирование — [Semantic Versioning](https://semver.org/lang/ru/).
@@ -11,16 +10,39 @@
 ## [Unreleased]
 
 ### Added
-- PAPI: `%terracore_gc_*%` — 17 плейсхолдеров для `/gc` (TPS, память, чанки, сущности, аптайм).
-- PAPI: `%terracore_ping_color%`, `%terracore_ping_colored%` — цвет по порогам.
-- PAPI: `%terracore_compass%`, `%terracore_compass_localized%`, `%terracore_compass_sector%`.
-- PAPI: `%terracore_world_time%`, `%terracore_world_time_name%`, `%terracore_world_weather%`, `%terracore_world_weather_name%`.
-- PAPI: `%terracore_fire_ticks%`, `%terracore_freeze_ticks%`, `%terracore_burning%`, `%terracore_frozen%`.
-- PAPI: `%terracore_walk_speed%`, `%terracore_fly_speed%`.
-- PAPI: `%terracore_vanished_list%` — имена vanished через запятую.
-- PAPI: `%terracore_enchant_max%`, `%terracore_give_max%`, `%terracore_spawnmob_max%`, `%terracore_near_radius%`, `%terracore_compass_duration%` — лимиты из конфига.
-- Config: 13 новых разделов (`compass`, `spawn-mob`, `time`, `weather`, `speed`, `burn`, `ice`, `near`, `ping`, `enchant`, `give`, `cooldowns.cleanup-period-minutes`, `vanish.reapply-period-ticks`).
-- `/compass` — BossBar-компас с настраиваемым цветом, стилем и периодом.
+
+**Публичный API**
+- `TerraCoreAPI` — безопасные данные о состоянии игрока (god/fly/vanish/afk/mail/cooldown).
+- `TerraCoreAdminAPI` — чувствительные данные (IP, координаты, first/last join) с проверкой права `terracraft.core.api.sensitive`.
+- `PlayerSnapshot` DTO — снимок офлайн-игрока (`ru.terracraft.api.dto`).
+- События: `TerraGodChangeEvent`, `TerraFlyChangeEvent`, `TerraVanishChangeEvent`, `TerraAfkChangeEvent` (наследуют `TerraStateChangeEvent`).
+- Регистрация обоих API в `ServicesManager` при `onEnable()`.
+- Методы `TerraCoreAPI`: `level`, `exp`, `saturation`, `walkSpeed`, `flySpeed`, `canSee`.
+- Методы для офлайн-игроков: `isFlying(UUID)`, `gamemode(UUID)` — читают память или БД.
+
+**AFK-детект**
+- `AfkManager` — AFK-статус с `lastActivity`, `touch`, `set`, `toggle`, `clear`.
+- `AfkTask` — авто-детект по таймауту (`afk.timeout-seconds`).
+- `AfkListener` — трекинг активности (join/move/chat/command/interact).
+- `/afk [player]` — toggle себе или другому (право `terracraft.core.afk.others`).
+- `afk.bypass` — не помечать игрока AFK автоматически.
+- PAPI: `%terracore_afk%`, `%terracore_afk_count%`.
+
+**Почта**
+- `/mail send|inbox|read|clear|unread` — внутренняя почта (offline-сообщения).
+- `MailService` — таблица `tc_mail`, методы `send`, `inbox`, `find`, `unreadCount`, `markRead`, `clearRead`.
+- Уведомление о непрочитанных при входе.
+- PAPI: `%terracore_mail_unread%`.
+
+**Локализация**
+- `/tc lang` — список локалей, % заполнения, missing-ключи.
+- Per-locale валидация: `LangManager.validateAllKeys()` проверяет **каждую** локаль.
+- Метод `missingKeys(Locale)` — для команды и валидации.
+- `LocaleStats` record — статистика для `/tc lang`.
+- Логи: `Loaded built-in locale` vs `Loaded custom locale` + количество ключей.
+
+**Команды**
+- `/compass` — BossBar-компас с настраиваемым цветом, стилем, периодом.
 - `/time smooth` — плавная смена времени с настраиваемой длительностью.
 - `/hat` — только блоки, `hat.others` для других игроков.
 - `/skull` — поддержка офлайн-игроков.
@@ -32,23 +54,50 @@
 - `/spawnmob` — `spawn-mob.max-count`, `max-health`, `spread-radius`.
 - `/weather unlock` — длительности из конфига.
 - `/speed 0` — сброс на `speed.walk-default` / `fly-default`.
+
+**PAPI**
+- `%terracore_gc_*%` — 17 плейсхолдеров для `/gc` (TPS, память, чанки, сущности, аптайм).
+- `%terracore_ping_color%`, `%terracore_ping_colored%` — цвет по порогам.
+- `%terracore_compass%`, `%terracore_compass_localized%`, `%terracore_compass_sector%`.
+- `%terracore_world_time%`, `%terracore_world_time_name%`, `%terracore_world_weather%`, `%terracore_world_weather_name%`.
+- `%terracore_fire_ticks%`, `%terracore_freeze_ticks%`, `%terracore_burning%`, `%terracore_frozen%`.
+- `%terracore_walk_speed%`, `%terracore_fly_speed%`.
+- `%terracore_vanished_list%` — имена vanished через запятую.
+- `%terracore_enchant_max%`, `%terracore_give_max%`, `%terracore_spawnmob_max%`, `%terracore_near_radius%`, `%terracore_compass_duration%` — лимиты из конфига.
+
+**Конфиг**
+- 14 новых разделов: `afk`, `compass`, `spawn-mob`, `time`, `weather`, `speed`, `burn`, `ice`, `near`, `ping`, `enchant`, `give`, `cooldowns.cleanup-period-minutes`, `vanish.reapply-period-ticks`.
+
+**Инфраструктура**
 - `VanishTask` — период из `vanish.reapply-period-ticks`.
 - `CooldownManager` — период очистки из `cooldowns.cleanup-period-minutes`.
 - `StartupBanner` — реальная проверка Storage/Languages, статус «with warnings».
 - `CHANGELOG.md`, `CONTRIBUTING.md`, `.gitignore`.
+- JitPack-публикация: `compileOnly 'com.github.luci4ka:TerraCraftCore:<version>'`.
+- GitHub Actions: авто-релиз JAR при пуше тега `v*`.
 
 ### Changed
+- **Переименование:** `Core` → `TerraCraftCore`.
+    - `paper-plugin.yml`: `name: TerraCraftCore`.
+    - `settings.gradle`: `rootProject.name = 'TerraCraftCore'`.
+    - JAR: `TerraCraftCore-<version>.jar` (толстый) + `TerraCraftCore-<version>-thin.jar` (API).
+    - JitPack: `com.github.luci4ka:TerraCraftCore`.
 - `WeatherCommand` — читает `weather.*` из конфига (раньше — жёсткие константы).
-- `TerraCorePlugin` — `reloadAll()` перезапускает `VanishTask` и `CooldownManager` с новыми периодами.
-- `TerraCorePlugin` — `cooldowns.cleanup-period-minutes` читается при старте.
+- `TerraCorePlugin` — `reloadAll()` перезапускает `VanishTask`, `CooldownManager`, `AfkTask` с новыми периодами.
+- `TerraCorePlugin` — `onEnable()` использует единый `PluginManager` (`pm`) вместо повторных `getServer().getPluginManager()`.
 - `GcCommand` — красивый вывод: блоки «Сервер / Память / Мир», TPS с цветом, память с процентом.
 - `PlaceholderHook` — 30+ плейсхолдеров (было 19).
-- `LangKey` — ~200 ключей (было ~150).
+- `LangKey` — ~200 ключей (было ~150) + `AFK_*`, `MAIL_*`.
 - `.lang` → `.yml` — плоский YAML, ключи с точками в кавычках.
+- `StatsService` — `INSERT ... ON DUPLICATE KEY UPDATE` (атомарный upsert, без гонки).
+- `MailService.inbox` — `.setLimit(limit)` в SQL вместо ручной обрезки.
+- `MessageService.confirm` — fallback на дефолтные `[✔ Да]` / `[✘ Нет]` вместо тихого warning.
+- `LangManager` — `readFromJar` логирует `Created` / `Updated` для встроенных локалей.
 
 ### Fixed
 - `PlayerJoinListener` — vanish без права: флаг снимается при `restore()`.
 - `PlayerQuitListener` — `clearMemoryOnly` для fly/god (утечка памяти).
+- `PlayerQuitListener` — `afk().clear(id)` при выходе.
 - `VanishTask` — `firstError` вместо `started` (стектрейс один раз).
 - `LangManager` — `resolver()` поддерживает `Component` (для `Component.translatable`).
 - `ConfirmManager` — `start()` идемпотентен, `stop()` для `onDisable`.
@@ -56,6 +105,9 @@
 - `EnchantCommand` — ключ `enchantment.minecraft.*` вместо `minecraft.*`.
 - `TerraCoreCommand` — `getPluginMeta()` вместо `getDescription()`.
 - `GamemodeManager` — `clear()` чистит `current` (утечка памяти).
+- `AfkListener.onMove` — защита от `IllegalArgumentException` при смене мира.
+- `AfkListener.onChat` — `AsyncChatEvent` + `runTask` (не вызывать `callEvent` из async).
+- `LangManager` — `getSavedGamemode(UUID)` для офлайн-игроков (API).
 
 ### Removed
 - `H2`, `HikariCP`, `MariaDB` из релоцированных (MineSQL — внешний плагин).
@@ -63,6 +115,7 @@
 - `MemoryLeakTest`, `IntegrationTest` — не работают без MockBukkit.
 - `storage.type`, `storage.h2-file`, `storage.mariadb-*` — заменено на MineSQL.
 - `vanish.announce-on-vanish`, `general.show-usage-on-error` — не используются.
+- Дублирующийся комментарий в `en_us.yml` (секция 12).
 
 ---
 
@@ -88,3 +141,4 @@
 - [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/)
 - [Semantic Versioning](https://semver.org/lang/ru/)
 - [Conventional Commits](https://www.conventionalcommits.org/ru/)
+- [JitPack — TerraCraftCore](https://jitpack.io/#luci4ka/TerraCraftCore)
