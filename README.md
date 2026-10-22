@@ -21,10 +21,10 @@
 - [Локализация](#-локализация)
 - [PlaceholderAPI](#-placeholderapi)
 - [Публичный API](#-публичный-api)
+- [Документация для разработчиков](#-документация-для-разработчиков)
 - [Команды](#-команды)
 - [Права](#-права)
 - [Сборка из исходников](#-сборка-из-исходников)
-- [Использование в других плагинах](#-использование-в-других-плагинах)
 - [Тесты](#-тесты)
 - [Архитектура](#-архитектура)
 - [Лицензия](#-лицензия)
@@ -357,53 +357,24 @@ plugins/TerraCraftCore/lang/
 
 ## 🔌 PlaceholderAPI
 
-| Плейсхолдер                      | Значение                          |
-|----------------------------------|-----------------------------------|
-| `%terracore_god%`                | `true`/`false`                    |
-| `%terracore_fly%`                | `true`/`false`                    |
-| `%terracore_vanished%`           | `true`/`false`                    |
-| `%terracore_afk%`                | `true`/`false`                    |
-| `%terracore_vanished_count%`     | сколько vanished онлайн           |
-| `%terracore_vanished_list%`      | имена vanished через запятую      |
-| `%terracore_god_count%`          | сколько в god                     |
-| `%terracore_fly_count%`          | сколько в fly                     |
-| `%terracore_afk_count%`          | сколько AFK                       |
-| `%terracore_ping%`               | пинг (мс)                         |
-| `%terracore_ping_color%`         | `green` / `yellow` / `red`        |
-| `%terracore_ping_colored%`       | `<green>42</green>` (MiniMessage) |
-| `%terracore_world%`              | имя мира                          |
-| `%terracore_world_time%`         | тики времени мира                 |
-| `%terracore_world_time_name%`    | «утро» / «день» / ...             |
-| `%terracore_world_weather%`      | `sun` / `rain` / `storm`          |
-| `%terracore_world_weather_name%` | «☀ ясно» / «☂ дождь» / «⚡ гроза»  |
-| `%terracore_gamemode%`           | локализованное имя режима         |
-| `%terracore_gamemode_id%`        | `SURVIVAL`/`CREATIVE`/...         |
-| `%terracore_health%`             | HP (напр. `18.5`)                 |
-| `%terracore_health_hearts%`      | HP в сердцах (`9.2`)              |
-| `%terracore_health_percent%`     | HP в % (`0..100`)                 |
-| `%terracore_food%`               | еда (`0..20`)                     |
-| `%terracore_saturation%`         | сатурация                         |
-| `%terracore_level%`              | уровень опыта                     |
-| `%terracore_exp%`                | прогресс до след. уровня          |
-| `%terracore_walk_speed%`         | скорость ходьбы                   |
-| `%terracore_fly_speed%`          | скорость полёта                   |
-| `%terracore_fire_ticks%`         | тики горения                      |
-| `%terracore_freeze_ticks%`       | тики заморозки                    |
-| `%terracore_burning%`            | `true`/`false`                    |
-| `%terracore_frozen%`             | `true`/`false`                    |
-| `%terracore_compass%`            | `N` / `E` / `S` / `W`             |
-| `%terracore_compass_localized%`  | «Север» / «Восток» / ...          |
-| `%terracore_compass_sector%`     | `0..3` (0=N, 1=E, 2=S, 3=W)       |
-| `%terracore_cooldown_<cmd>%`     | секунд до конца кулдауна          |
-| `%terracore_cooldown_<cmd>_raw%` | без `+1`                          |
-| `%terracore_mail_unread%`        | непрочитанных писем               |
-| `%terracore_enchant_max%`        | `enchant.max-level`               |
-| `%terracore_give_max%`           | `give.max-amount`                 |
-| `%terracore_spawnmob_max%`       | `spawn-mob.max-count`             |
-| `%terracore_near_radius%`        | `near.default-radius`             |
-| `%terracore_compass_duration%`   | `compass.duration-seconds`        |
+**30+ плейсхолдеров** для TAB, чата, scoreboard, DeluxeMenus, FeatherBoard, Holographic Displays.
 
-**Пример:** `%terracore_cooldown_heal%` → `0`, если кулдауна нет.
+### Краткий список
+
+| Плейсхолдер | Значение |
+|---|---|
+| `%terracore_god%` / `fly` / `vanished` / `afk` | `true` / `false` |
+| `%terracore_god_count%` / `fly_count` / `vanished_count` / `afk_count` | число |
+| `%terracore_ping%` / `ping_color` / `ping_colored` | `42` / `green` / `<green>42</green>` |
+| `%terracore_health%` / `health_hearts` / `health_percent` | `18.5` / `9.2` / `92` |
+| `%terracore_food%` / `saturation` / `level` / `exp` | число |
+| `%terracore_world%` / `world_time_name` / `world_weather_name` | строка |
+| `%terracore_gamemode%` / `gamemode_id` | локализованное / `SURVIVAL` |
+| `%terracore_cooldown_<cmd>%` / `_raw` | секунд |
+| `%terracore_gc_tps%` / `gc_memory_percent` / `gc_uptime%` | сервер |
+| `%terracore_mail_unread%` | число |
+
+**Полный список (50+ плейсхолдеров) + примеры для TAB, DeluxeMenus, FeatherBoard, чата, scoreboard — в [`docs/PAPI.md`](docs/PAPI.md).**
 
 ---
 
@@ -463,6 +434,44 @@ public void onVanish(TerraVanishChangeEvent e) { ... }
 
 @EventHandler
 public void onAfk(TerraAfkChangeEvent e) { ... }
+```
+
+---
+
+## 📚 Документация для разработчиков
+
+- **[`docs/API.md`](docs/API.md)** — полная документация API: `TerraCoreAPI`, `TerraCoreAdminAPI`, `PlayerSnapshot`, 4 события, `ServicesManager`.
+- **[`docs/PAPI.md`](docs/PAPI.md)** — PlaceholderAPI: все плейсхолдеры + примеры для TAB, DeluxeMenus, FeatherBoard, Holographic Displays.
+- **[`docs/EXAMPLES.md`](docs/EXAMPLES.md)** — 16 готовых примеров интеграции (TAB, чат, PvP, статистика, GUI, `/info`, PAPI).
+
+### Быстрый старт
+
+```groovy
+// build.gradle
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compileOnly 'com.github.luci4ka:TerraCraftCore:v1.0.2'
+}
+```
+
+```yaml
+# paper-plugin.yml
+dependencies:
+  server:
+    TerraCraftCore:
+      load: BEFORE
+      required: true
+      join-classpath: true   # ← критично для доступа к классам TerraCraftCore
+```
+
+```java
+TerraCoreAPI api = Bukkit.getServicesManager().load(TerraCoreAPI.class);
+if (api != null && api.isAfk(player)) {
+    // игрок AFK
+}
 ```
 
 ---
@@ -629,44 +638,6 @@ cd TerraCraftCore
 - **Нет** `minesql` (compileOnly) — плагин на сервере.
 
 **Размер:** ~1 МБ.
-
----
-
-## 📦 Использование в других плагинах
-
-### 1. Подключение через JitPack
-
-В `build.gradle` другого плагина:
-
-```groovy
-repositories {
-    maven { url 'https://jitpack.io' }
-}
-
-dependencies {
-    compileOnly 'com.github.luci4ka:TerraCraftCore:1.0.2'
-}
-```
-
-### 2. Обязательная зависимость в `paper-plugin.yml`
-
-```yaml
-dependencies:
-  server:
-    TerraCraftCore:
-      load: BEFORE
-      required: true
-      join-classpath: true   # ← критично для доступа к классам TerraCraftCore
-```
-
-### 3. Использование API
-
-```java
-TerraCoreAPI api = Bukkit.getServicesManager().load(TerraCoreAPI.class);
-if (api != null && api.isAfk(player)) {
-    // игрок AFK
-}
-```
 
 ---
 
