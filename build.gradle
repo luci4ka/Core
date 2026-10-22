@@ -66,8 +66,9 @@ processResources {
 }
 
 shadowJar {
+    archiveBaseName.set('TerraCraftCore')
     archiveClassifier.set('')
-    from sourceSets.main.output   // ← на всякий случай (Gradle 9.x)
+    from sourceSets.main.output
 
     relocate 'org.bstats',           'ru.terracraft.core.libs.bstats'
     relocate 'de.exlll.configlib',   'ru.terracraft.core.libs.configlib'
@@ -81,20 +82,19 @@ shadowJar {
     mergeServiceFiles()
 }
 
-// ✅ НЕ отключаем jar — даём ему classifier
 tasks.named('jar') {
+    archiveBaseName.set('TerraCraftCore')
     archiveClassifier.set('thin')
 }
 
 build.dependsOn shadowJar
 
-// ✅ Публикуем тонкий JAR (только API + ваши классы)
 publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact tasks.named('jar')
             groupId = 'ru.terracraft'
-            artifactId = 'TerraCore'
+            artifactId = 'TerraCraftCore'
             version = project.version
         }
     }

@@ -43,13 +43,12 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          # Только толстый JAR (TerraCore-1.0.2.jar), без -thin
           files: |
-            build/libs/TerraCore-*[0-9].jar
+            build/libs/TerraCraftCore-*[0-9].jar
           generate_release_notes: true
           draft: false
           prerelease: false
-          name: TerraCore ${{ github.ref_name }}
+          name: TerraCraftCore ${{ github.ref_name }}
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

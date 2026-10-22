@@ -1,4 +1,4 @@
-name: TerraCore
+name: TerraCraftCore
 version: '${version}'
 main: ru.terracraft.core.TerraCorePlugin
 api-version: '1.21'
