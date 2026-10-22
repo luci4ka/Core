@@ -10,6 +10,19 @@
 ## [Unreleased]
 
 ### Added
+- (пусто — все изменения вошли в 1.0.3)
+
+### Changed
+- (пусто)
+
+### Fixed
+- (пусто)
+
+---
+
+## [1.0.3] — 2026-10-22
+
+### Added
 
 **Публичный API**
 - `TerraCoreAPI` — безопасные данные о состоянии игрока (god/fly/vanish/afk/mail/cooldown).
@@ -73,15 +86,18 @@
 - `CooldownManager` — период очистки из `cooldowns.cleanup-period-minutes`.
 - `StartupBanner` — реальная проверка Storage/Languages, статус «with warnings».
 - `CHANGELOG.md`, `CONTRIBUTING.md`, `.gitignore`.
-- JitPack-публикация: `compileOnly 'com.github.luci4ka:TerraCraftCore:<version>'`.
 - GitHub Actions: авто-релиз JAR при пуше тега `v*`.
+- `docs/API.md`, `docs/PAPI.md`, `docs/EXAMPLES.md` — полная документация для разработчиков.
 
 ### Changed
 - **Переименование:** `Core` → `TerraCraftCore`.
-    - `paper-plugin.yml`: `name: TerraCraftCore`.
-    - `settings.gradle`: `rootProject.name = 'TerraCraftCore'`.
-    - JAR: `TerraCraftCore-<version>.jar` (толстый) + `TerraCraftCore-<version>-thin.jar` (API).
-    - JitPack: `com.github.luci4ka:TerraCraftCore`.
+  - `paper-plugin.yml`: `name: TerraCraftCore`.
+  - `settings.gradle`: `rootProject.name = 'TerraCraftCore'`.
+  - JAR: `TerraCraftCore-<version>.jar` (толстый) + `TerraCraftCore-<version>-api.jar` (API).
+  - JitPack: `com.github.luci4ka:TerraCraftCore`.
+- **JitPack-классификатор:** `thin` → `api`.
+  - `compileOnly 'com.github.luci4ka:TerraCraftCore:v1.0.3:api'`
+  - `docs/API.md`, `docs/EXAMPLES.md`, `README.md` обновлены.
 - `WeatherCommand` — читает `weather.*` из конфига (раньше — жёсткие константы).
 - `TerraCorePlugin` — `reloadAll()` перезапускает `VanishTask`, `CooldownManager`, `AfkTask` с новыми периодами.
 - `TerraCorePlugin` — `onEnable()` использует единый `PluginManager` (`pm`) вместо повторных `getServer().getPluginManager()`.
@@ -108,6 +124,8 @@
 - `AfkListener.onMove` — защита от `IllegalArgumentException` при смене мира.
 - `AfkListener.onChat` — `AsyncChatEvent` + `runTask` (не вызывать `callEvent` из async).
 - `LangManager` — `getSavedGamemode(UUID)` для офлайн-игроков (API).
+- **JitPack** — `compileOnly` теперь видит `ru.terracraft.api.*` (артефакт `-api.jar` публикуется корректно).
+- `playerstatsnew` — добавлен `metadataSources { gradleMetadata(); mavenPom() }` для JitPack.
 
 ### Removed
 - `H2`, `HikariCP`, `MariaDB` из релоцированных (MineSQL — внешний плагин).
@@ -116,6 +134,21 @@
 - `storage.type`, `storage.h2-file`, `storage.mariadb-*` — заменено на MineSQL.
 - `vanish.announce-on-vanish`, `general.show-usage-on-error` — не используются.
 - Дублирующийся комментарий в `en_us.yml` (секция 12).
+
+---
+
+## [1.0.2] — 2026-10-21
+
+### Added
+- (без изменений — только тесты в этой версии)
+
+### Changed
+- (без изменений)
+
+### Fixed
+- (без изменений)
+
+> **Примечание:** версия `1.0.2` была промежуточной — основные изменения вошли в `1.0.3`.
 
 ---
 

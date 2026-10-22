@@ -449,13 +449,21 @@ public void onAfk(TerraAfkChangeEvent e) { ... }
 ```groovy
 // build.gradle
 repositories {
-    maven { url 'https://jitpack.io' }
+    maven {
+        url 'https://jitpack.io'
+        metadataSources {
+            gradleMetadata()
+            mavenPom()
+        }
+    }
 }
 
 dependencies {
-    compileOnly 'com.github.luci4ka:TerraCraftCore:v1.0.2'
+    compileOnly 'com.github.luci4ka:TerraCraftCore:v1.0.3:api'
 }
 ```
+
+> ⚠️ **`:api`** — обязательный классификатор. Без него Gradle не найдёт артефакт (JitPack отдаёт только `-api.jar`, не основной `-thin.jar`).
 
 ```yaml
 # paper-plugin.yml
@@ -616,7 +624,8 @@ cd TerraCraftCore
 ./gradlew clean test build
 
 # JAR появится в:
-# build/libs/TerraCraftCore-1.0.2.jar
+# build/libs/TerraCraftCore-1.0.3.jar       ← толстый (для сервера)
+# build/libs/TerraCraftCore-1.0.3-api.jar   ← тонкий (для compileOnly)
 ```
 
 ### Windows
@@ -627,15 +636,16 @@ cd TerraCraftCore
 
 ### Что внутри JAR
 
+**Толстый JAR (`TerraCraftCore-1.0.3.jar`):**
 - Ваш код (`ru.terracraft.core.*`, `ru.terracraft.api.*`).
 - Релоцированные зависимости:
     - `ru.terracraft.core.libs.bstats`
     - `ru.terracraft.core.libs.configlib`
     - `ru.terracraft.core.libs.updater`
-- **Нет** `paper-api` (compileOnly) — берётся с сервера.
-- **Нет** `commandapi` (compileOnly) — плагин на сервере.
-- **Нет** `placeholderapi` (compileOnly) — плагин на сервере.
-- **Нет** `minesql` (compileOnly) — плагин на сервере.
+
+**Тонкий JAR (`TerraCraftCore-1.0.3-api.jar`):**
+- Только ваш код (`ru.terracraft.core.*`, `ru.terracraft.api.*`).
+- **Нет** `bstats`, `configlib`, `updater` — только API.
 
 **Размер:** ~1 МБ.
 

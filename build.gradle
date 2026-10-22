@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'ru.terracraft'
-version = System.getenv('RELEASE_VERSION') ?: '1.0.2'
+version = System.getenv('RELEASE_VERSION') ?: '1.0.3'
 
 repositories {
     mavenCentral()
@@ -65,10 +65,10 @@ processResources {
     }
 }
 
+
 shadowJar {
     archiveBaseName.set('TerraCraftCore')
     archiveClassifier.set('')
-    from sourceSets.main.output
 
     relocate 'org.bstats',           'ru.terracraft.core.libs.bstats'
     relocate 'de.exlll.configlib',   'ru.terracraft.core.libs.configlib'
@@ -84,7 +84,7 @@ shadowJar {
 
 tasks.named('jar') {
     archiveBaseName.set('TerraCraftCore')
-    archiveClassifier.set('thin')
+    archiveClassifier.set('api')
 }
 
 build.dependsOn shadowJar
@@ -92,7 +92,7 @@ build.dependsOn shadowJar
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact tasks.named('jar')
+            artifact tasks.named('jar')   // ← classifier 'api' подхватится автоматически
             groupId = 'ru.terracraft'
             artifactId = 'TerraCraftCore'
             version = project.version
