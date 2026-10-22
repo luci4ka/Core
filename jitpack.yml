@@ -1,4 +1,4 @@
 jdk:
   - openjdk25
 install:
-  - ./gradlew clean jar publishToMavenLocal -x test
+  - ./gradlew clean build publishToMavenLocal -x test
