@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'   # триггер на теги v1.0.2, v1.0.3, ...
+      - 'v*'
 
 permissions:
   contents: write
@@ -29,6 +29,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
       - name: Build with Gradle
         run: ./gradlew clean shadowJar -x test
         env:
@@ -40,11 +43,13 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          # Только толстый JAR (TerraCore-1.0.2.jar), без -thin
           files: |
-            build/libs/TerraCore-*.jar
+            build/libs/TerraCore-*[0-9].jar
           generate_release_notes: true
           draft: false
           prerelease: false
           name: TerraCore ${{ github.ref_name }}
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
